@@ -1,0 +1,131 @@
+const copy = {
+    terms: "Terms",
+    privacy: "Privacy",
+    docs: "Docs",
+    myRifts: "My Rifts",
+    heroLine1: "Enter one side.",
+    heroLine2: "Exit another.",
+    heroBody:
+      "Rift opens a gap between chains. Send from one network, receive on another — straight to your wallet, at a locked rate.",
+    nonCustodial: "Non-custodial",
+    noAccount: "No account",
+    directWallet: "Direct to wallet",
+    swapTicket: "Swap ticket",
+    syncing: "SYNCING…",
+    noMarket: "NO MARKET",
+    selectPair: "SELECT PAIR",
+    send: "Send",
+    receive: "Receive",
+    sizeOptional: "Size (optional)",
+    estimated: "Estimated",
+    settlementAddress: "Settlement address",
+    pasteAddress: "Paste your {coin} address",
+    pasteAddressOrName: "Address or name.eth / .sol / .crypto",
+    memoRequired: "Memo / tag (required)",
+    pasteMemo: "Enter the destination memo or tag",
+    connectWallet: "Fill from wallet",
+    connectingWallet: "Connecting…",
+    walletFilled: "Filled from {wallet}",
+    walletFailed: "Could not connect wallet",
+    resolvingName: "Resolving name…",
+    nameResolved: "Resolved {name} via {service}",
+    nameResolveFailed: "Could not resolve that name",
+    limits: "Limits",
+    openRift: "Open rift",
+    openingRift: "Opening rift…",
+    rateArrival: "Any size within limits · Rate locks on arrival",
+    enterAddress: "Enter the address where you want to receive funds",
+    invalidAddress: "Receiving address looks invalid",
+    enterMemo: "This network requires a destination memo or tag",
+    verifyTitle: "Verify the destination",
+    verifyBody:
+      "Crypto transfers cannot be reversed. Confirm the address before opening the Rift.",
+    typeLastSix: "Type the final 6 characters",
+    confirmationMismatch: "The final 6 characters do not match",
+    cancel: "Cancel",
+    confirmOpen: "Confirm & open",
+    newRift: "New rift",
+    waiting: "Waiting for deposit",
+    pending: "Confirming deposit",
+    processing: "Processing",
+    settling: "Sending to your wallet",
+    settled: "Completed",
+    refund: "Refund in progress",
+    refunded: "Refunded",
+    expired: "Expired",
+    multiple: "Multiple deposits detected",
+    scanPay: "Scan to pay",
+    depositAddress: "Deposit address",
+    amount: "Amount",
+    sendBetween: "Send between",
+    network: "Network",
+    settlingTo: "Settling to",
+    validUntil: "Valid until",
+    refresh: "Refresh",
+    checking: "Checking…",
+    copy: "Copy",
+    copied: "Copied",
+    sharePrivate: "Share private link",
+    linkCopied: "Private link copied",
+    depositHelp:
+      "Send any amount within the range. The rate locks when your deposit is detected. Amounts outside the range may be reviewed or refunded.",
+    riftsTitle: "Recover a Rift",
+    riftsBody:
+      "Paste a Rift ID or its private link. An ID works only on a browser where its recovery token was saved.",
+    riftId: "Rift ID or private link",
+    recover: "Recover",
+    recentRifts: "Saved on this device",
+    noSavedRifts: "No Rifts are saved on this device.",
+    missingToken:
+      "This browser does not have the recovery token. Use the complete private link.",
+    invalidRift: "Enter a valid Rift ID or private link.",
+    loadingRift: "Loading Rift status…",
+    riftUnavailable: "This Rift could not be loaded.",
+    backHome: "Back home",
+    cardEarly: "Rift Card · Early access",
+    cardTitle: "Want a Rift Card?",
+    cardBody:
+      "Load it. Use it. Replace it when you want. Designed to cost little enough to retire and issue again without the usual friction.",
+    joinWaitlist: "Join the private waitlist",
+    join: "Join",
+    joining: "Joining…",
+    learnMore: "View card details",
+    cardPageTitle: "A card designed to be replaced.",
+    cardPageBody:
+      "Fund it for what you need, use it, retire it, and request another. Rift Card is being designed around low issuance friction and direct control.",
+    cardFeature1: "Load on demand",
+    cardFeature2: "Retire when finished",
+    cardFeature3: "Request another",
+    comingSoon: "Product details and availability may change before launch.",
+    support: "Telegram support",
+    searchCoin: "Search coin…",
+    swapAssets: "Swap assets",
+    tape: "Tape",
+    recentTransactions: "Recent transactions",
+    live: "Live",
+    sent: "Sent",
+    route: "Route",
+    received: "Received",
+    time: "Time",
+    private: "Private",
+} as const;
+
+export type TranslationKey = keyof typeof copy;
+
+export function useLanguage() {
+  return {
+    locale: "en-US" as const,
+    t(key: TranslationKey, values?: Record<string, string>) {
+      let text: string = copy[key];
+      for (const [name, replacement] of Object.entries(values ?? {})) {
+        text = text.replaceAll(`{${name}}`, replacement);
+      }
+      return text;
+    },
+  };
+}
+
+export function Translated({ id }: { id: TranslationKey }) {
+  const { t } = useLanguage();
+  return <>{t(id)}</>;
+}
