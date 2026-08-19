@@ -1,6 +1,10 @@
-const telegramUrl = process.env.NEXT_PUBLIC_RIFT_TELEGRAM_URL;
+import { telegramBotUrl } from "@/lib/telegram-public";
+
+const supportTelegramUrl = () =>
+  process.env.NEXT_PUBLIC_RIFT_TELEGRAM_URL?.trim() || telegramBotUrl();
 
 export function SupportLink({ label = "Telegram support" }: { label?: string }) {
+  const telegramUrl = supportTelegramUrl();
   if (!telegramUrl || !/^https:\/\/t\.me\/[a-zA-Z0-9_]+$/.test(telegramUrl)) {
     return null;
   }

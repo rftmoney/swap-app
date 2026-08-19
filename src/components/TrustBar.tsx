@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TelegramDeskLink } from "@/components/TelegramDeskLink";
 import { useLanguage } from "@/components/LanguageProvider";
+import { telegramBotAvailable } from "@/lib/telegram-public";
 
 type PlatformStats = {
   assetCount: number;
@@ -48,6 +50,12 @@ export function TrustBar() {
           <>
             <span aria-hidden> · </span>
             {t("recentShifts24h", { count: String(recent) })}
+          </>
+        ) : null}
+        {telegramBotAvailable() ? (
+          <>
+            <span aria-hidden> · </span>
+            <TelegramDeskLink />
           </>
         ) : null}
       </p>

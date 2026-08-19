@@ -36,7 +36,6 @@ function mainMenuKeyboard(): TelegramInlineKeyboard {
     inline_keyboard: [
       [{ text: "Open Swap", web_app: { url: miniApp } }],
       [{ text: "Website", url: site }],
-      [{ text: "Help", callback_data: "help" }],
     ],
   };
 }
@@ -175,6 +174,11 @@ async function handleCommand(chatId: number, text: string) {
     return;
   }
 
+  if (command === "/about") {
+    await sendMainMenu(chatId);
+    return;
+  }
+
   if (command === "/status") {
     await sendStatusHelp(chatId);
     return;
@@ -190,6 +194,12 @@ async function handleCommand(chatId: number, text: string) {
 async function handleCallback(callback: TelegramCallbackQuery) {
   const chatId = callback.message?.chat?.id;
   if (!chatId || !callback.id) return;
+
+  if (callback.data === "about") {
+    await answerTelegramCallback(callback.id);
+    await sendMainMenu(chatId);
+    return;
+  }
 
   if (callback.data === "help") {
     await answerTelegramCallback(callback.id);
