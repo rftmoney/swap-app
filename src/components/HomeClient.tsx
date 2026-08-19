@@ -12,7 +12,6 @@ import { TrustBar } from "@/components/TrustBar";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   DEFAULT_FEATURED_PAIR,
-  pairHeadline,
   type PopularPair,
 } from "@/lib/popular-pairs";
 import riftArt from "../../public/rift.png";
@@ -27,31 +26,10 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
   const [swapKey, setSwapKey] = useState(0);
   const [featuredPair, setFeaturedPair] = useState<PopularPair>(initialPair);
   const [pairPreset, setPairPreset] = useState<PopularPair | null>(null);
-  const [settlementMinutes, setSettlementMinutes] = useState(4);
 
   useEffect(() => {
     setFeaturedPair(initialPair);
   }, [initialPair]);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const response = await fetch("/api/stats");
-        const data = (await response.json()) as {
-          averageSettlementMinutes?: number;
-        };
-        if (active && response.ok && data.averageSettlementMinutes) {
-          setSettlementMinutes(data.averageSettlementMinutes);
-        }
-      } catch {
-        /* default */
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   function goHome(event: React.MouseEvent<HTMLAnchorElement>) {
     if (!riftOpen) return;
@@ -67,8 +45,6 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
   }
 
   const clearPairPreset = useCallback(() => setPairPreset(null), []);
-
-  const route = pairHeadline(featuredPair);
 
   return (
     <div className={`shell${riftOpen ? " is-rift-open" : ""}`}>
@@ -99,12 +75,11 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
               sizes="(max-width: 900px) 80vw, 420px"
             />
             <h1>
-              {t("heroHeadline", {
-                route,
-                minutes: String(settlementMinutes),
-              })}
+              {t("heroLine1")}
+              <br />
+              <span>{t("heroLine2")}</span>
             </h1>
-            <p>{t("heroSubline")}</p>
+            <p>{t("heroBody")}</p>
             <PopularPairButtons
               activeSlug={featuredPair.slug}
               onSelect={selectPair}

@@ -3,8 +3,10 @@ const copy = {
     privacy: "Privacy",
     docs: "Docs",
     myRifts: "My Rifts",
-    heroHeadline: "{route} in ~{minutes} min.",
-    heroSubline: "No account. Direct to wallet.",
+    heroLine1: "Enter one side.",
+    heroLine2: "Exit another.",
+    heroBody:
+      "Rift opens a gap between chains. Send from one network, receive on another — straight to your wallet, at a locked rate.",
     nonCustodial: "Non-custodial",
     noKyc: "No KYC",
     noAccount: "No account",
