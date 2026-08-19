@@ -145,14 +145,9 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
   if (isComplete) {
     return (
       <section className="deposit-panel is-complete" aria-live="polite">
-        <header className="deposit-header">
-          <button type="button" className="ghost-btn" onClick={onBack}>
-            ← {t("newRift")}
-          </button>
-        </header>
         <CompletedScreen shift={shift} variant="success" t={t} />
         <footer className="deposit-footer deposit-footer-compact">
-          <div className="deposit-actions">
+          <div className="deposit-actions deposit-actions-pair">
             <button type="button" className="primary-btn" onClick={onBack}>
               {t("newRift")}
             </button>
@@ -396,24 +391,36 @@ function CompletedScreen({
       <h2 className="rift-complete-title">{title}</h2>
       <p className="rift-complete-body">{body}</p>
       <div className="rift-complete-route">
-        <div>
+        <div className="route-side">
           <span className="field-label">{t("send")}</span>
-          <strong>
-            {shift.depositAmount
-              ? `${shift.depositAmount} ${shift.depositCoin.toUpperCase()}`
-              : shift.depositCoin.toUpperCase()}
-          </strong>
-          <small>{shift.depositNetwork}</small>
+          <div className="route-asset">
+            <AssetIcon coin={shift.depositCoin} />
+            <span className="route-asset-text">
+              <strong>
+                {shift.depositAmount
+                  ? `${shift.depositAmount} ${shift.depositCoin.toUpperCase()}`
+                  : shift.depositCoin.toUpperCase()}
+              </strong>
+              <small>{shift.depositNetwork}</small>
+            </span>
+          </div>
         </div>
-        <span aria-hidden>→</span>
-        <div>
+        <span className="route-arrow" aria-hidden>
+          →
+        </span>
+        <div className="route-side">
           <span className="field-label">{t("receive")}</span>
-          <strong>
-            {shift.settleAmount
-              ? `${shift.settleAmount} ${shift.settleCoin.toUpperCase()}`
-              : shift.settleCoin.toUpperCase()}
-          </strong>
-          <small>{shift.settleNetwork}</small>
+          <div className="route-asset">
+            <AssetIcon coin={shift.settleCoin} />
+            <span className="route-asset-text">
+              <strong>
+                {shift.settleAmount
+                  ? `${shift.settleAmount} ${shift.settleCoin.toUpperCase()}`
+                  : shift.settleCoin.toUpperCase()}
+              </strong>
+              <small>{shift.settleNetwork}</small>
+            </span>
+          </div>
         </div>
       </div>
       <p className="rift-complete-wallet" title={shift.settleAddress}>

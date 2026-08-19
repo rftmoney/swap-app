@@ -84,8 +84,8 @@ function TickerGroup({
             <img
               src={coinIconUrl(item.symbol.toLowerCase())}
               alt=""
-              width={16}
-              height={16}
+              width={18}
+              height={18}
             />
             <strong>{item.symbol}</strong>
             <span>{formatPrice(item.price)}</span>

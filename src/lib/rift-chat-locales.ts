@@ -86,7 +86,7 @@ const COPY: Record<ChatLocale, ChatUiCopy> = {
       swap:
         "Pick your coins, paste your receive wallet, tap Open rift, confirm the last 6 characters of the address, then send crypto to the deposit address shown. Your rate locks once the deposit is detected.",
       status:
-        "After you send, the page updates on its own: Waiting → Confirming → Processing → Sending → Completed. Tap Refresh if it feels stuck, or open your tracking link at rft.money/rift/…",
+        "After you send, the page updates on its own: Awaiting → Confirming → Rift Completed. Tap Refresh if it feels stuck, or open your tracking link at rft.money/rift/…",
       recover:
         "Open My Rifts (/rift) or your private link (rft.money/rift/ID#token=…). The full link works anywhere. Without the token, recovery only works on the same browser where you opened the swap.",
       wallet:
