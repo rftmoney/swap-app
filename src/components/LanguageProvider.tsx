@@ -109,8 +109,6 @@ const copy = {
     telegramNotifyUnavailable: "Telegram alerts are not available right now.",
     telegramDesk: "Open in Telegram ↗",
     telegramHeroKicker: "Also on Telegram",
-    telegramHeroBody:
-      "Cross-chain swaps, wallet to wallet. Same desk inside {bot} — no account, no custody.",
     searchCoin: "Search coin…",
     swapAssets: "Swap assets",
     tape: "Tape",

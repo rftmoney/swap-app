@@ -437,47 +437,13 @@ input {
 }
 
 .hero-telegram-kicker {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.45rem;
   color: var(--text);
   font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-}
-
-.hero-telegram-body {
-  margin: 0 0 0.55rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.55;
-}
-
-.hero-telegram-link {
-  display: inline-block;
-  color: var(--muted);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-telegram-link:hover {
-  color: var(--text);
-}
-
-.telegram-desk-link {
-  color: var(--muted);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.telegram-desk-link:hover {
-  color: var(--text);
-  border-bottom-color: var(--line-strong);
 }
 
 .swap-panel,
