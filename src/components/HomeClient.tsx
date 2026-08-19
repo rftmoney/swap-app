@@ -8,7 +8,7 @@ import { PopularPairButtons } from "@/components/PopularPairButtons";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { RiftCardInvite } from "@/components/RiftCardInvite";
 import { SwapWidget } from "@/components/SwapWidget";
-import { TrustBar } from "@/components/TrustBar";
+import { TelegramDeskLink } from "@/components/TelegramDeskLink";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   DEFAULT_FEATURED_PAIR,
@@ -101,7 +101,6 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
             onPairChange={setFeaturedPair}
             onRiftChange={setRiftOpen}
           />
-          {!riftOpen ? <TrustBar /> : null}
         </section>
       </main>
 
@@ -115,6 +114,7 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
               <Link href="/terms">{t("terms")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
               <Link href="/rift">{t("myRifts")}</Link>
+              <TelegramDeskLink className="footer-telegram-link" />
             </nav>
             <p>Always verify the deposit address before sending funds.</p>
           </footer>

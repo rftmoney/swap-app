@@ -12,7 +12,7 @@ export function buildSiteMetadata(): Metadata {
   const origin = siteOrigin();
   const title = "Rift — Cross-chain crypto swaps";
   const description =
-    "Swap BTC, ETH, USDT, SOL and 200+ assets. No account. Non-custodial. Direct to your wallet in minutes.";
+    "Send from one chain, receive on another. Locked rates, direct to your wallet.";
 
   return {
     title,

@@ -50,7 +50,9 @@ export default function OpenGraphImage() {
               lineHeight: 1.02,
             }}
           >
-            BTC → ETH in minutes.
+            Enter one side.
+            <br />
+            Exit another.
           </div>
           <div
             style={{
@@ -59,7 +61,7 @@ export default function OpenGraphImage() {
               letterSpacing: "-0.02em",
             }}
           >
-            No account · Non-custodial · Direct to wallet
+            Cross-chain swaps, wallet to wallet.
           </div>
         </div>
 

@@ -36,6 +36,7 @@ function mainMenuKeyboard(): TelegramInlineKeyboard {
     inline_keyboard: [
       [{ text: "Open Swap", web_app: { url: miniApp } }],
       [{ text: "Website", url: site }],
+      [{ text: "Help", callback_data: "help" }],
     ],
   };
 }
