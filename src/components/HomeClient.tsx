@@ -1,14 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DeskClock } from "@/components/DeskClock";
-import { PopularPairButtons } from "@/components/PopularPairButtons";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { RiftCardInvite } from "@/components/RiftCardInvite";
+import { TelegramHeroNote } from "@/components/TelegramHeroNote";
 import { SwapWidget } from "@/components/SwapWidget";
-import { TelegramDeskLink } from "@/components/TelegramDeskLink";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   DEFAULT_FEATURED_PAIR,
@@ -24,24 +23,13 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
   const { t } = useLanguage();
   const [riftOpen, setRiftOpen] = useState(false);
   const [swapKey, setSwapKey] = useState(0);
-  const [featuredPair, setFeaturedPair] = useState<PopularPair>(initialPair);
   const [pairPreset, setPairPreset] = useState<PopularPair | null>(null);
-
-  useEffect(() => {
-    setFeaturedPair(initialPair);
-  }, [initialPair]);
 
   function goHome(event: React.MouseEvent<HTMLAnchorElement>) {
     if (!riftOpen) return;
     event.preventDefault();
     setRiftOpen(false);
     setSwapKey((value) => value + 1);
-  }
-
-  function selectPair(pair: PopularPair) {
-    setFeaturedPair(pair);
-    setPairPreset(pair);
-    window.history.replaceState(null, "", `/swap/${pair.slug}`);
   }
 
   const clearPairPreset = useCallback(() => setPairPreset(null), []);
@@ -80,10 +68,7 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
               <span>{t("heroLine2")}</span>
             </h1>
             <p>{t("heroBody")}</p>
-            <PopularPairButtons
-              activeSlug={featuredPair.slug}
-              onSelect={selectPair}
-            />
+            <TelegramHeroNote />
             <ul className="hero-stats" aria-label="How Rift settles">
               <li>{t("nonCustodial")}</li>
               <li>{t("directWallet")}</li>
@@ -98,7 +83,6 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
             initialPair={initialPair}
             pairPreset={pairPreset}
             onPairPresetApplied={clearPairPreset}
-            onPairChange={setFeaturedPair}
             onRiftChange={setRiftOpen}
           />
         </section>
@@ -114,7 +98,6 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
               <Link href="/terms">{t("terms")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
               <Link href="/rift">{t("myRifts")}</Link>
-              <TelegramDeskLink className="footer-telegram-link" />
             </nav>
             <p>Always verify the deposit address before sending funds.</p>
           </footer>

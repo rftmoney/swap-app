@@ -107,7 +107,10 @@ const copy = {
       "Opens @Rftmoneybot to enable a completion message for this swap.",
     telegramNotifyOpening: "Opening Telegram…",
     telegramNotifyUnavailable: "Telegram alerts are not available right now.",
-    telegramDesk: "Telegram",
+    telegramDesk: "Open in Telegram ↗",
+    telegramHeroKicker: "Also on Telegram",
+    telegramHeroBody:
+      "Cross-chain swaps, wallet to wallet. Same desk inside {bot} — no account, no custody.",
     searchCoin: "Search coin…",
     swapAssets: "Swap assets",
     tape: "Tape",
