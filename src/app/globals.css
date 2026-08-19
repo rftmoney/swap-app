@@ -1018,8 +1018,8 @@ input {
   border-bottom: 1px solid var(--line);
 }
 
-.rift-progress-three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.rift-progress-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .rift-progress-step {
@@ -1050,7 +1050,7 @@ input {
 }
 
 .rift-progress-step.is-active .rift-progress-marker {
-  background: var(--text);
+  background: var(--positive);
   animation: pulse 1.4s ease infinite;
 }
 
@@ -1240,8 +1240,8 @@ input {
   }
 }
 
-.status-pill.status-awaiting,
-.status-pill.status-confirming {
+.status-pill.status-step-0,
+.status-pill.status-step-1 {
   color: var(--text);
 }
 

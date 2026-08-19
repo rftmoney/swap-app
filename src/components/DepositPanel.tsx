@@ -16,53 +16,44 @@ type Props = {
   onRefresh: (shift: Shift) => void;
 };
 
-type ProgressPhase = "awaiting" | "confirming" | "done";
-
 const PROGRESS_STEPS: TranslationKey[] = [
-  "statusStepAwaiting",
+  "statusStepWaiting",
   "statusStepConfirming",
+  "statusStepSettling",
   "statusStepDone",
 ];
 
-function progressPhase(status: string): ProgressPhase {
-  if (status === "settled") return "done";
-  if (
-    ["pending", "processing", "settling", "refund", "multiple"].includes(status)
-  ) {
-    return "confirming";
+function progressStepIndex(status: string): number {
+  const normalized = status.toLowerCase();
+  if (normalized === "settled") return 3;
+  if (normalized === "settling") return 2;
+  if (["pending", "processing", "refund", "multiple"].includes(normalized)) {
+    return 1;
   }
-  return "awaiting";
-}
-
-function progressStepIndex(phase: ProgressPhase): number {
-  if (phase === "confirming") return 1;
-  if (phase === "done") return 2;
   return 0;
 }
 
-function phaseHeadline(phase: ProgressPhase): TranslationKey {
-  if (phase === "confirming") return "statusStepConfirming";
-  if (phase === "done") return "statusStepDone";
-  return "statusStepAwaiting";
+function stepHeadline(step: number): TranslationKey {
+  return PROGRESS_STEPS[Math.min(step, PROGRESS_STEPS.length - 1)];
 }
 
-function phaseDetail(phase: ProgressPhase): TranslationKey {
-  if (phase === "confirming") return "statusMsgConfirming";
-  if (phase === "done") return "statusMsgSettled";
+function stepDetail(step: number): TranslationKey {
+  if (step >= 3) return "statusMsgSettled";
+  if (step === 2) return "statusMsgSettling";
+  if (step === 1) return "statusMsgConfirming";
   return "statusMsgWaiting";
 }
 
 export function DepositPanel({ shift, onBack, onRefresh }: Props) {
   const { locale, t } = useLanguage();
   const status = shift.status?.toLowerCase() ?? "waiting";
-  const phase = progressPhase(status);
+  const activeStep = progressStepIndex(status);
   const isComplete = status === "settled";
   const isExpired = status === "expired";
   const isRefunded = status === "refunded";
   const isTerminal = isExpired || isRefunded;
   const stopPolling = isComplete || isTerminal;
-  const awaitingDeposit = phase === "awaiting" && !shift.depositAmount;
-  const activeStep = progressStepIndex(phase);
+  const awaitingDeposit = activeStep === 0 && !shift.depositAmount;
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [pollError, setPollError] = useState(false);
@@ -192,20 +183,20 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         <button type="button" className="ghost-btn" onClick={onBack}>
           ← {t("newRift")}
         </button>
-        <p className={`status-pill status-${phase}`}>
+        <p className={`status-pill status-step-${activeStep}`}>
           <span className="status-dot" />
-          {t(phaseHeadline(phase))}
+          {t(stepHeadline(activeStep))}
         </p>
       </header>
 
       <div className="rift-status-banner" role="status">
         <p className="rift-status-headline">
-          {t(phaseHeadline(phase))}
+          {t(stepHeadline(activeStep))}
           {!pollError ? (
             <span className="rift-status-live">{t("checkingStatus")}</span>
           ) : null}
         </p>
-        <p className="rift-status-detail">{t(phaseDetail(phase))}</p>
+        <p className="rift-status-detail">{t(stepDetail(activeStep))}</p>
         {shift.depositAmount ? (
           <p className="rift-deposit-detected">
             {t("depositDetected")}:{" "}
@@ -219,7 +210,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         ) : null}
       </div>
 
-      <ol className="rift-progress rift-progress-three" aria-label="Swap progress">
+      <ol className="rift-progress rift-progress-four" aria-label="Swap progress">
         {PROGRESS_STEPS.map((label, index) => {
           const state =
             index < activeStep
@@ -270,7 +261,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         </div>
       </div>
 
-      {phase === "awaiting" ? (
+      {activeStep === 0 ? (
         <div className="deposit-body">
           <figure className="qr-wrap">
             <QRCodeSVG
@@ -337,7 +328,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
       )}
 
       <footer className="deposit-footer">
-        {phase === "awaiting" ? (
+        {activeStep === 0 ? (
           <p className="muted">{t("depositHelp")}</p>
         ) : null}
         <div className="deposit-actions">
