@@ -8,8 +8,10 @@ type RecentTransaction = {
   createdAt: string;
   depositCoin: string;
   depositNetwork: string;
+  depositAmount: string | null;
   settleCoin: string;
   settleNetwork: string;
+  settleAmount: string | null;
 };
 
 export function RecentTransactions() {
@@ -52,7 +54,7 @@ export function RecentTransactions() {
       <header className="section-heading">
         <div>
           <p>{t("tape")}</p>
-          <h2 id="recent-title">{t("recentRoutes")}</h2>
+          <h2 id="recent-title">{t("recentTransactions")}</h2>
         </div>
         <span className="live-label">
           <i aria-hidden />
@@ -60,22 +62,27 @@ export function RecentTransactions() {
         </span>
       </header>
 
-      <div className="recent-table recent-table-compact">
+      <div className="recent-table">
         <div className="recent-row recent-table-head" aria-hidden>
+          <span>{t("sent")}</span>
           <span>{t("route")}</span>
+          <span>{t("received")}</span>
           <span>{t("time")}</span>
         </div>
 
         {transactions.length
           ? transactions.map((transaction, index) => (
-              <RouteRow
+              <TransactionRow
                 transaction={transaction}
                 now={now}
+                privateLabel={t("private")}
                 key={`${transaction.createdAt}-${transaction.depositCoin}-${transaction.settleCoin}-${index}`}
               />
             ))
           : Array.from({ length: 5 }, (_, index) => (
               <div className="recent-row recent-skeleton" key={index}>
+                <span />
+                <span />
                 <span />
                 <span />
               </div>
@@ -85,29 +92,40 @@ export function RecentTransactions() {
   );
 }
 
-function RouteRow({
+function TransactionRow({
   transaction,
   now,
+  privateLabel,
 }: {
   transaction: RecentTransaction;
   now: number;
+  privateLabel: string;
 }) {
-  const from = transaction.depositCoin.toUpperCase();
-  const to = transaction.settleCoin.toUpperCase();
-  const label = `${from} → ${to}`;
+  const privateAmount =
+    transaction.depositAmount === null || transaction.settleAmount === null;
 
   return (
     <div className="recent-row">
+      <AssetAmount
+        coin={transaction.depositCoin}
+        amount={transaction.depositAmount}
+        privateAmount={privateAmount}
+        privateLabel={privateLabel}
+      />
       <span
-        className="recent-route-chip"
+        className="transaction-route"
         title={`${transaction.depositNetwork} → ${transaction.settleNetwork}`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={coinIconUrl(transaction.depositCoin)} alt="" width={20} height={20} />
-        <strong>{label}</strong>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={coinIconUrl(transaction.settleCoin)} alt="" width={20} height={20} />
+        {transaction.depositNetwork}
+        <b aria-hidden>→</b>
+        {transaction.settleNetwork}
       </span>
+      <AssetAmount
+        coin={transaction.settleCoin}
+        amount={transaction.settleAmount}
+        privateAmount={privateAmount}
+        privateLabel={privateLabel}
+      />
       <time
         dateTime={transaction.createdAt}
         title={clockTime(transaction.createdAt)}
@@ -116,6 +134,38 @@ function RouteRow({
       </time>
     </div>
   );
+}
+
+function AssetAmount({
+  coin,
+  amount,
+  privateAmount,
+  privateLabel,
+}: {
+  coin: string;
+  amount: string | null;
+  privateAmount: boolean;
+  privateLabel: string;
+}) {
+  return (
+    <span className="transaction-asset">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={coinIconUrl(coin)} alt="" width={22} height={22} />
+      <span>
+        <strong>{coin.toUpperCase()}</strong>
+        <small>{privateAmount ? privateLabel : formatAmount(amount)}</small>
+      </span>
+    </span>
+  );
+}
+
+function formatAmount(amount: string | null) {
+  if (!amount) return "—";
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return amount;
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 8,
+  }).format(value);
 }
 
 function clockTime(value: string) {

@@ -11,7 +11,6 @@ const copy = {
     assetCount: "{count}+ assets",
     typicalSettlement: "Typical settlement: ~{minutes} min",
     recentShifts24h: "{count} rifts in the last 24h",
-    recentRoutes: "Recent routes",
     directWallet: "Direct to wallet",
     swapTicket: "Swap ticket",
     syncing: "SYNCING…",
