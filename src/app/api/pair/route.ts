@@ -44,10 +44,9 @@ export async function GET(request: Request) {
     return NextResponse.json(pair, {
       headers: { "Cache-Control": "public, max-age=15, stale-while-revalidate=30" },
     });
-  } catch {
-    return NextResponse.json(
-      { error: "Rate is temporarily unavailable" },
-      { status: 502 },
-    );
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Rate is temporarily unavailable";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }

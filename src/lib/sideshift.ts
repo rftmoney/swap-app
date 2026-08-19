@@ -101,15 +101,25 @@ export async function getRecentShifts(limit = 10) {
 }
 
 export async function getPair(from: string, to: string, amount?: string) {
-  const { affiliateId } = getCredentials();
-  const params = new URLSearchParams({
-    affiliateId,
-    commissionRate: AFFILIATE_COMMISSION_RATE,
-  });
-  if (amount) params.set("amount", amount);
-  return sideshiftFetch<PairInfo>(
-    `/pair/${encodeURIComponent(from)}/${encodeURIComponent(to)}?${params}`,
-  );
+  const path = `/pair/${encodeURIComponent(from)}/${encodeURIComponent(to)}`;
+
+  try {
+    const { affiliateId } = getCredentials();
+    const params = new URLSearchParams({
+      affiliateId,
+      commissionRate: AFFILIATE_COMMISSION_RATE,
+    });
+    if (amount) params.set("amount", amount);
+    return await sideshiftFetch<PairInfo>(`${path}?${params}`);
+  } catch {
+    // Missing or invalid affiliate credentials — still show a public market rate.
+    const params = new URLSearchParams();
+    if (amount) params.set("amount", amount);
+    const qs = params.toString();
+    return sideshiftFetch<PairInfo>(`${path}${qs ? `?${qs}` : ""}`, {
+      auth: false,
+    });
+  }
 }
 
 export async function requestQuote(
