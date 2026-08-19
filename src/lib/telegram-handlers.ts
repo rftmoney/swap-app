@@ -9,7 +9,7 @@ import {
   telegramMiniAppUrl,
   type TelegramInlineKeyboard,
 } from "@/lib/telegram-bot";
-import { telegramAboutMessage } from "@/lib/telegram-about";
+import { RIFT_TELEGRAM_TAGLINE } from "@/lib/telegram-about";
 import { linkTelegramChat } from "@/lib/telegram-notify";
 import { siteOrigin } from "@/lib/site-url";
 
@@ -35,11 +35,8 @@ function mainMenuKeyboard(): TelegramInlineKeyboard {
   return {
     inline_keyboard: [
       [{ text: "Open Swap", web_app: { url: miniApp } }],
-      [
-        { text: "About", callback_data: "about" },
-        { text: "Help", callback_data: "help" },
-      ],
       [{ text: "Website", url: site }],
+      [{ text: "Help", callback_data: "help" }],
     ],
   };
 }
@@ -57,7 +54,7 @@ function mainMenuText() {
   return [
     "<b>Rift on Telegram</b>",
     "",
-    "Swap across chains — non-custodial, no account, direct to your wallet.",
+    RIFT_TELEGRAM_TAGLINE,
     "",
     "• Tap <b>Open Swap</b> to start a new rift",
     "• Use /status to recover an active swap",
@@ -100,13 +97,6 @@ async function sendMainMenu(chatId: number) {
   });
   if (sent) return;
   await sendTelegramMessage(chatId, mainMenuText(), {
-    parseMode: "HTML",
-    replyMarkup: mainMenuKeyboard(),
-  });
-}
-
-async function sendAbout(chatId: number) {
-  await sendTelegramMessage(chatId, telegramAboutMessage(), {
     parseMode: "HTML",
     replyMarkup: mainMenuKeyboard(),
   });
@@ -185,11 +175,6 @@ async function handleCommand(chatId: number, text: string) {
     return;
   }
 
-  if (command === "/about") {
-    await sendAbout(chatId);
-    return;
-  }
-
   if (command === "/status") {
     await sendStatusHelp(chatId);
     return;
@@ -209,12 +194,6 @@ async function handleCallback(callback: TelegramCallbackQuery) {
   if (callback.data === "help") {
     await answerTelegramCallback(callback.id);
     await sendHelp(chatId);
-    return;
-  }
-
-  if (callback.data === "about") {
-    await answerTelegramCallback(callback.id);
-    await sendAbout(chatId);
     return;
   }
 

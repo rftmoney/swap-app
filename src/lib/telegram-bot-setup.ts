@@ -17,7 +17,6 @@ import { siteOrigin } from "@/lib/site-url";
 const BOT_COMMANDS = [
   { command: "start", description: "Open the Rift home menu" },
   { command: "swap", description: "Open the swap desk" },
-  { command: "about", description: "About Rift" },
   { command: "help", description: "How Rift works" },
   { command: "status", description: "Track a Rift swap" },
 ];
