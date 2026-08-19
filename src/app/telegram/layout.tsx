@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: "Rift Swap — Telegram",
   description: "Swap crypto cross-chain inside Telegram.",
   robots: { index: false, follow: false },
+  icons: {
+    icon: [{ url: "/bot-avatar.png", type: "image/png" }],
+    apple: [{ url: "/bot-avatar.png", type: "image/png" }],
+  },
 };
 
 export default function TelegramLayout({ children }: LayoutProps<"/telegram">) {

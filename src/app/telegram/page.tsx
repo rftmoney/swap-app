@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import { SwapWidget } from "@/components/SwapWidget";
 
@@ -30,8 +31,20 @@ export default function TelegramSwapPage() {
   return (
     <main className="telegram-app" aria-label="Rift swap">
       <header className="telegram-app-header">
-        <p className="telegram-app-kicker">Rift</p>
-        <h1>Swap desk</h1>
+        <div className="telegram-app-brand">
+          <Image
+            src="/bot-avatar.png"
+            alt=""
+            width={56}
+            height={56}
+            priority
+            className="telegram-app-logo"
+          />
+          <div>
+            <p className="telegram-app-kicker">Rift</p>
+            <h1>Swap desk</h1>
+          </div>
+        </div>
         <p>Non-custodial · Direct to wallet</p>
       </header>
       <SwapWidget />

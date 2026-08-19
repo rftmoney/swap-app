@@ -77,6 +77,35 @@ export async function sendTelegramMessage(
   }
 }
 
+export function telegramBotAvatarUrl() {
+  return `${siteOrigin()}/bot-avatar.png`;
+}
+
+export async function sendTelegramPhoto(
+  chatId: string | number,
+  photoUrl: string,
+  options?: {
+    caption?: string;
+    replyMarkup?: TelegramInlineKeyboard;
+    parseMode?: "HTML" | "Markdown";
+  },
+) {
+  if (!telegramBotConfigured()) return false;
+
+  try {
+    await telegramCall("sendPhoto", {
+      chat_id: chatId,
+      photo: photoUrl,
+      caption: options?.caption,
+      parse_mode: options?.parseMode,
+      reply_markup: options?.replyMarkup,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function answerTelegramCallback(
   callbackQueryId: string,
   text?: string,

@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   registerTelegramWebhook,
+  telegramBotAvatarUrl,
   telegramCall,
   telegramMiniAppUrl,
 } from "@/lib/telegram-bot";
@@ -39,6 +40,10 @@ export async function configureTelegramBot() {
       "Cross-chain crypto swaps on Rift — non-custodial, direct to your wallet.",
   });
 
+  await telegramCall("setMyName", {
+    name: "Rift",
+  });
+
   await telegramCall("setChatMenuButton", {
     menu_button: {
       type: "web_app",
@@ -51,6 +56,9 @@ export async function configureTelegramBot() {
     ok: true,
     origin,
     miniAppUrl,
+    botAvatarUrl: telegramBotAvatarUrl(),
+    botFatherAvatarHint:
+      "Upload public/bot-avatar.png via @BotFather → /mybots → Rift → Edit Bot → Edit Botpic",
     commands: BOT_COMMANDS.map((item) => item.command),
   };
 }

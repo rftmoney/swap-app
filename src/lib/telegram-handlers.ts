@@ -3,6 +3,8 @@ import "server-only";
 import {
   answerTelegramCallback,
   sendTelegramMessage,
+  sendTelegramPhoto,
+  telegramBotAvatarUrl,
   telegramBotProfileUrl,
   telegramMiniAppUrl,
   type TelegramInlineKeyboard,
@@ -89,6 +91,12 @@ function statusHelpText() {
 }
 
 async function sendMainMenu(chatId: number) {
+  const sent = await sendTelegramPhoto(chatId, telegramBotAvatarUrl(), {
+    caption: mainMenuText(),
+    parseMode: "HTML",
+    replyMarkup: mainMenuKeyboard(),
+  });
+  if (sent) return;
   await sendTelegramMessage(chatId, mainMenuText(), {
     parseMode: "HTML",
     replyMarkup: mainMenuKeyboard(),

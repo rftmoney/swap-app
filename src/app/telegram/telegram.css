@@ -15,24 +15,45 @@
   text-align: center;
 }
 
+.telegram-app-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-bottom: 0.45rem;
+}
+
+.telegram-app-logo {
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.telegram-app-brand h1 {
+  margin: 0;
+  text-align: left;
+}
+
 .telegram-app-kicker {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.15rem;
   color: #767676;
   font-family: var(--font-mono), monospace;
   font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
+  text-align: left;
 }
 
 .telegram-app-header h1 {
-  margin: 0 0 0.35rem;
   font-family: var(--font-display), sans-serif;
   font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.03em;
 }
 
-.telegram-app-header p {
+.telegram-app-header > p {
   margin: 0;
   color: #767676;
   font-size: 0.78rem;
