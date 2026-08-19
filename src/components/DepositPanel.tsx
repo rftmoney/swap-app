@@ -17,56 +17,53 @@ type Props = {
   onRefresh: (shift: Shift) => void;
 };
 
-const STATUS_COPY: Record<string, TranslationKey> = {
-  waiting: "waiting",
-  pending: "pending",
-  processing: "processing",
-  settling: "settling",
-  settled: "settled",
-  refund: "refund",
-  refunded: "refunded",
-  expired: "expired",
-  multiple: "multiple",
-};
+type ProgressPhase = "awaiting" | "confirming" | "done";
 
-const STATUS_MESSAGE: Record<string, TranslationKey> = {
-  waiting: "statusMsgWaiting",
-  pending: "statusMsgPending",
-  processing: "statusMsgProcessing",
-  settling: "statusMsgSettling",
-  settled: "statusMsgSettled",
-  refund: "statusMsgRefund",
-  refunded: "statusMsgRefunded",
-  expired: "statusMsgExpired",
-  multiple: "statusMsgMultiple",
-};
-
-const STATUS_STEP: Record<string, number> = {
-  waiting: 0,
-  pending: 1,
-  processing: 2,
-  settling: 3,
-  settled: 4,
-  refunded: 4,
-  expired: 4,
-  refund: 3,
-  multiple: 2,
-};
-
-const STEPS: TranslationKey[] = [
-  "statusStepWaiting",
-  "statusStepPending",
-  "statusStepProcessing",
-  "statusStepSettling",
+const PROGRESS_STEPS: TranslationKey[] = [
+  "statusStepAwaiting",
+  "statusStepConfirming",
   "statusStepDone",
 ];
+
+function progressPhase(status: string): ProgressPhase {
+  if (status === "settled") return "done";
+  if (
+    ["pending", "processing", "settling", "refund", "multiple"].includes(status)
+  ) {
+    return "confirming";
+  }
+  return "awaiting";
+}
+
+function progressStepIndex(phase: ProgressPhase): number {
+  if (phase === "confirming") return 1;
+  if (phase === "done") return 2;
+  return 0;
+}
+
+function phaseHeadline(phase: ProgressPhase): TranslationKey {
+  if (phase === "confirming") return "statusStepConfirming";
+  if (phase === "done") return "statusStepDone";
+  return "statusStepAwaiting";
+}
+
+function phaseDetail(phase: ProgressPhase): TranslationKey {
+  if (phase === "confirming") return "statusMsgConfirming";
+  if (phase === "done") return "statusMsgSettled";
+  return "statusMsgWaiting";
+}
 
 export function DepositPanel({ shift, onBack, onRefresh }: Props) {
   const { locale, t } = useLanguage();
   const status = shift.status?.toLowerCase() ?? "waiting";
-  const done = ["settled", "refunded", "expired"].includes(status);
-  const awaitingDeposit = status === "waiting" && !shift.depositAmount;
-  const activeStep = STATUS_STEP[status] ?? 0;
+  const phase = progressPhase(status);
+  const isComplete = status === "settled";
+  const isExpired = status === "expired";
+  const isRefunded = status === "refunded";
+  const isTerminal = isExpired || isRefunded;
+  const stopPolling = isComplete || isTerminal;
+  const awaitingDeposit = phase === "awaiting" && !shift.depositAmount;
+  const activeStep = progressStepIndex(phase);
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [pollError, setPollError] = useState(false);
@@ -84,7 +81,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
       : `https://${trackingDisplay}`;
 
   useEffect(() => {
-    if (done) return;
+    if (stopPolling) return;
     const timer = window.setInterval(async () => {
       try {
         const res = await fetch(`/api/shift/${shift.id}`, {
@@ -105,7 +102,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
       }
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [done, onRefresh, shift.id, shift.pollToken]);
+  }, [onRefresh, shift.id, shift.pollToken, stopPolling]);
 
   useEffect(() => {
     const statusChanged = prevStatus.current !== status;
@@ -145,6 +142,54 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
     }
   }
 
+  if (isComplete) {
+    return (
+      <section className="deposit-panel is-complete" aria-live="polite">
+        <header className="deposit-header">
+          <button type="button" className="ghost-btn" onClick={onBack}>
+            ← {t("newRift")}
+          </button>
+        </header>
+        <CompletedScreen shift={shift} variant="success" t={t} />
+        <footer className="deposit-footer deposit-footer-compact">
+          <div className="deposit-actions">
+            <button type="button" className="primary-btn" onClick={onBack}>
+              {t("newRift")}
+            </button>
+            {shift.pollToken ? (
+              <ShareLinkButton shift={shift} t={t} />
+            ) : null}
+          </div>
+        </footer>
+      </section>
+    );
+  }
+
+  if (isTerminal) {
+    return (
+      <section className="deposit-panel is-terminal" aria-live="polite">
+        <header className="deposit-header">
+          <button type="button" className="ghost-btn" onClick={onBack}>
+            ← {t("newRift")}
+          </button>
+        </header>
+        <CompletedScreen
+          shift={shift}
+          variant={isExpired ? "expired" : "refunded"}
+          t={t}
+        />
+        <footer className="deposit-footer deposit-footer-compact">
+          <div className="deposit-actions">
+            <SupportLink label={t("support")} />
+            <button type="button" className="secondary-btn" onClick={onBack}>
+              {t("newRift")}
+            </button>
+          </div>
+        </footer>
+      </section>
+    );
+  }
+
   return (
     <section
       className={`deposit-panel${depositFlash ? " is-updated" : ""}`}
@@ -154,22 +199,20 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         <button type="button" className="ghost-btn" onClick={onBack}>
           ← {t("newRift")}
         </button>
-        <p className={`status-pill status-${status}`}>
+        <p className={`status-pill status-${phase}`}>
           <span className="status-dot" />
-          {STATUS_COPY[status] ? t(STATUS_COPY[status]) : status}
+          {t(phaseHeadline(phase))}
         </p>
       </header>
 
       <div className="rift-status-banner" role="status">
         <p className="rift-status-headline">
-          {STATUS_COPY[status] ? t(STATUS_COPY[status]) : status}
-          {!done && !pollError ? (
+          {t(phaseHeadline(phase))}
+          {!pollError ? (
             <span className="rift-status-live">{t("checkingStatus")}</span>
           ) : null}
         </p>
-        <p className="rift-status-detail">
-          {STATUS_MESSAGE[status] ? t(STATUS_MESSAGE[status]) : t("statusMsgWaiting")}
-        </p>
+        <p className="rift-status-detail">{t(phaseDetail(phase))}</p>
         {shift.depositAmount ? (
           <p className="rift-deposit-detected">
             {t("depositDetected")}:{" "}
@@ -183,15 +226,13 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         ) : null}
       </div>
 
-      <ol className="rift-progress" aria-label="Swap progress">
-        {STEPS.map((label, index) => {
+      <ol className="rift-progress rift-progress-three" aria-label="Swap progress">
+        {PROGRESS_STEPS.map((label, index) => {
           const state =
             index < activeStep
               ? "complete"
               : index === activeStep
-                ? done && index === STEPS.length - 1
-                  ? "complete"
-                  : "active"
+                ? "active"
                 : "upcoming";
           return (
             <li key={label} className={`rift-progress-step is-${state}`}>
@@ -217,11 +258,9 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
             </span>
           </div>
         </div>
-
         <span className="route-arrow" aria-hidden>
           →
         </span>
-
         <div className="route-side">
           <span className="field-label">{t("receive")}</span>
           <div className="route-asset">
@@ -238,118 +277,258 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         </div>
       </div>
 
-      <div className="deposit-body">
-        <figure className="qr-wrap">
-          <QRCodeSVG
-            value={shift.depositAddress}
-            size={148}
-            bgColor="transparent"
-            fgColor="#ffffff"
-            level="M"
-          />
-          <figcaption>{t("scanPay")}</figcaption>
-        </figure>
-
-        <div className="deposit-fields">
-          <div className="deposit-field">
-            <span className="field-label">{t("riftTracking")}</span>
-            <CopyRow
-              value={trackingDisplay}
-              copy={t("copy")}
-              copied={t("copied")}
-              copyValue={trackingCopy}
+      {phase === "awaiting" ? (
+        <div className="deposit-body">
+          <figure className="qr-wrap">
+            <QRCodeSVG
+              value={shift.depositAddress}
+              size={148}
+              bgColor="transparent"
+              fgColor="#ffffff"
+              level="M"
             />
-            <p className="rift-tracking-hint">{t("riftTrackingHint")}</p>
-          </div>
+            <figcaption>{t("scanPay")}</figcaption>
+          </figure>
 
-          <div className="deposit-field">
-            <span className="field-label">{t("depositAddress")}</span>
-            <CopyRow value={shift.depositAddress} copy={t("copy")} copied={t("copied")} />
-          </div>
-
-          {shift.depositMemo ? (
+          <div className="deposit-fields">
             <div className="deposit-field">
-              <span className="field-label">{t("memoRequired")}</span>
-              <CopyRow value={shift.depositMemo} copy={t("copy")} copied={t("copied")} />
+              <span className="field-label">{t("riftTracking")}</span>
+              <CopyRow
+                value={trackingDisplay}
+                copy={t("copy")}
+                copied={t("copied")}
+                copyValue={trackingCopy}
+              />
+              <p className="rift-tracking-hint">{t("riftTrackingHint")}</p>
             </div>
-          ) : null}
 
-          <dl className="deposit-meta">
-            <div>
-              <dt>{shift.depositAmount ? t("amount") : t("sendBetween")}</dt>
-              <dd>
-                {shift.depositAmount
-                  ? `${shift.depositAmount} ${shift.depositCoin.toUpperCase()}`
-                  : shift.depositMin && shift.depositMax
-                    ? `${shift.depositMin} – ${shift.depositMax} ${shift.depositCoin.toUpperCase()}`
-                    : "—"}
-              </dd>
+            <div className="deposit-field">
+              <span className="field-label">{t("depositAddress")}</span>
+              <CopyRow
+                value={shift.depositAddress}
+                copy={t("copy")}
+                copied={t("copied")}
+              />
             </div>
-            <div>
-              <dt>{t("network")}</dt>
-              <dd>{shift.depositNetwork}</dd>
-            </div>
-            <div>
-              <dt>Rift ID</dt>
-              <dd title={shift.id}>{truncate(shift.id, 22)}</dd>
-            </div>
-            <div>
-              <dt>{t("settlingTo")}</dt>
-              <dd title={shift.settleAddress}>
-                {truncate(shift.settleAddress)}
-              </dd>
-            </div>
-            {awaitingDeposit ? (
-              <div>
-                <dt>{t("validUntil")}</dt>
-                <dd>
-                  {shift.expiresAt
-                    ? new Date(shift.expiresAt).toLocaleString(locale, {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "—"}
-                </dd>
+
+            {shift.depositMemo ? (
+              <div className="deposit-field">
+                <span className="field-label">{t("memoRequired")}</span>
+                <CopyRow
+                  value={shift.depositMemo}
+                  copy={t("copy")}
+                  copied={t("copied")}
+                />
               </div>
             ) : null}
-          </dl>
+
+            <DepositMeta
+              shift={shift}
+              locale={locale}
+              t={t}
+              awaitingDeposit={awaitingDeposit}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="deposit-body deposit-body-confirming">
+          <div className="rift-confirming-pulse" aria-hidden />
+          <p className="rift-confirming-note">{t("statusMsgConfirming")}</p>
+          <DepositMeta
+            shift={shift}
+            locale={locale}
+            t={t}
+            awaitingDeposit={false}
+          />
+        </div>
+      )}
 
       <footer className="deposit-footer">
-        <p className="muted">{t("depositHelp")}</p>
+        {phase === "awaiting" ? (
+          <p className="muted">{t("depositHelp")}</p>
+        ) : null}
         <div className="deposit-actions">
           <SupportLink label={t("support")} />
           {shift.pollToken ? (
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={async () => {
-                await navigator.clipboard.writeText(
-                  privateRiftUrl(shift.id, shift.pollToken as string),
-                );
-                setLinkCopied(true);
-                window.setTimeout(() => setLinkCopied(false), 1800);
-              }}
-            >
-              {linkCopied ? t("linkCopied") : t("sharePrivate")}
-            </button>
+            <ShareLinkButton shift={shift} t={t} />
           ) : null}
-          {!done && (
-            <button
-              type="button"
-              className="secondary-btn"
-              disabled={refreshing}
-              onClick={refreshShift}
-            >
-              {refreshing ? t("checking") : t("refresh")}
-            </button>
-          )}
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={refreshing}
+            onClick={refreshShift}
+          >
+            {refreshing ? t("checking") : t("refresh")}
+          </button>
         </div>
       </footer>
     </section>
+  );
+}
+
+function CompletedScreen({
+  shift,
+  variant,
+  t,
+}: {
+  shift: Shift;
+  variant: "success" | "expired" | "refunded";
+  t: ReturnType<typeof useLanguage>["t"];
+}) {
+  const title =
+    variant === "success"
+      ? t("riftCompleted")
+      : variant === "expired"
+        ? t("riftExpiredTitle")
+        : t("riftRefundedTitle");
+  const body =
+    variant === "success"
+      ? t("riftCompletedBody")
+      : variant === "expired"
+        ? t("riftExpiredBody")
+        : t("riftRefundedBody");
+
+  return (
+    <div className={`rift-complete-screen is-${variant}`}>
+      <div className="rift-complete-icon" aria-hidden>
+        {variant === "success" ? <CheckIcon /> : <CloseIcon />}
+      </div>
+      <h2 className="rift-complete-title">{title}</h2>
+      <p className="rift-complete-body">{body}</p>
+      <div className="rift-complete-route">
+        <div>
+          <span className="field-label">{t("send")}</span>
+          <strong>
+            {shift.depositAmount
+              ? `${shift.depositAmount} ${shift.depositCoin.toUpperCase()}`
+              : shift.depositCoin.toUpperCase()}
+          </strong>
+          <small>{shift.depositNetwork}</small>
+        </div>
+        <span aria-hidden>→</span>
+        <div>
+          <span className="field-label">{t("receive")}</span>
+          <strong>
+            {shift.settleAmount
+              ? `${shift.settleAmount} ${shift.settleCoin.toUpperCase()}`
+              : shift.settleCoin.toUpperCase()}
+          </strong>
+          <small>{shift.settleNetwork}</small>
+        </div>
+      </div>
+      <p className="rift-complete-wallet" title={shift.settleAddress}>
+        {t("settlingTo")}: {truncate(shift.settleAddress, 28)}
+      </p>
+    </div>
+  );
+}
+
+function DepositMeta({
+  shift,
+  locale,
+  t,
+  awaitingDeposit,
+}: {
+  shift: Shift;
+  locale: string;
+  t: ReturnType<typeof useLanguage>["t"];
+  awaitingDeposit: boolean;
+}) {
+  return (
+    <dl className="deposit-meta">
+      <div>
+        <dt>{shift.depositAmount ? t("amount") : t("sendBetween")}</dt>
+        <dd>
+          {shift.depositAmount
+            ? `${shift.depositAmount} ${shift.depositCoin.toUpperCase()}`
+            : shift.depositMin && shift.depositMax
+              ? `${shift.depositMin} – ${shift.depositMax} ${shift.depositCoin.toUpperCase()}`
+              : "—"}
+        </dd>
+      </div>
+      <div>
+        <dt>{t("network")}</dt>
+        <dd>{shift.depositNetwork}</dd>
+      </div>
+      <div>
+        <dt>Rift ID</dt>
+        <dd title={shift.id}>{truncate(shift.id, 22)}</dd>
+      </div>
+      <div>
+        <dt>{t("settlingTo")}</dt>
+        <dd title={shift.settleAddress}>{truncate(shift.settleAddress)}</dd>
+      </div>
+      {awaitingDeposit ? (
+        <div>
+          <dt>{t("validUntil")}</dt>
+          <dd>
+            {shift.expiresAt
+              ? new Date(shift.expiresAt).toLocaleString(locale, {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "—"}
+          </dd>
+        </div>
+      ) : null}
+    </dl>
+  );
+}
+
+function ShareLinkButton({
+  shift,
+  t,
+}: {
+  shift: Shift;
+  t: ReturnType<typeof useLanguage>["t"];
+}) {
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="secondary-btn"
+      onClick={async () => {
+        await navigator.clipboard.writeText(
+          privateRiftUrl(shift.id, shift.pollToken as string),
+        );
+        setLinkCopied(true);
+        window.setTimeout(() => setLinkCopied(false), 1800);
+      }}
+    >
+      {linkCopied ? t("linkCopied") : t("sharePrivate")}
+    </button>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M5 12.5 10 17.5 19 7.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M7 7l10 10M17 7 7 17"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
