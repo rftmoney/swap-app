@@ -61,7 +61,7 @@ async function tryUploadBotProfilePhoto() {
   const form = new FormData();
   form.append(
     "photo",
-    new Blob([bytes], { type: "image/png" }),
+    new Blob([Uint8Array.from(bytes)], { type: "image/png" }),
     "bot-avatar.png",
   );
 

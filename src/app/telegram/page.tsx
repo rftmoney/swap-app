@@ -1,53 +1,28 @@
-"use client";
+import type { Metadata } from "next";
+import Script from "next/script";
+import { TelegramSwapClient } from "@/app/telegram/TelegramSwapClient";
+import "./telegram.css";
 
-import Image from "next/image";
-import { useEffect } from "react";
-import { SwapWidget } from "@/components/SwapWidget";
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        ready: () => void;
-        expand: () => void;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        themeParams?: { bg_color?: string };
-      };
-    };
-  }
-}
+export const metadata: Metadata = {
+  title: "Rift Swap — Telegram",
+  description: "Swap crypto cross-chain inside Telegram.",
+  robots: { index: false, follow: false },
+  icons: {
+    icon: [{ url: "/bot-avatar.png", type: "image/png" }],
+    apple: [{ url: "/bot-avatar.png", type: "image/png" }],
+  },
+};
 
 export default function TelegramSwapPage() {
-  useEffect(() => {
-    const webApp = window.Telegram?.WebApp;
-    if (!webApp) return;
-    webApp.ready();
-    webApp.expand();
-    webApp.setHeaderColor("#000000");
-    webApp.setBackgroundColor("#000000");
-  }, []);
-
   return (
-    <main className="telegram-app" aria-label="Rift swap">
-      <header className="telegram-app-header">
-        <div className="telegram-app-brand">
-          <Image
-            src="/bot-avatar.png"
-            alt=""
-            width={56}
-            height={56}
-            priority
-            className="telegram-app-logo"
-          />
-          <div>
-            <p className="telegram-app-kicker">Rift</p>
-            <h1>Swap desk</h1>
-          </div>
-        </div>
-        <p>Non-custodial · Direct to wallet</p>
-      </header>
-      <SwapWidget />
-    </main>
+    <>
+      <Script
+        src="https://telegram.org/js/telegram-web-app.js"
+        strategy="beforeInteractive"
+      />
+      <div className="telegram-shell">
+        <TelegramSwapClient />
+      </div>
+    </>
   );
 }
