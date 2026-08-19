@@ -52,13 +52,12 @@ export function TrustBar() {
             {t("recentShifts24h", { count: String(recent) })}
           </>
         ) : null}
-        {telegramBotAvailable() ? (
-          <>
-            <span aria-hidden> · </span>
-            <TelegramDeskLink />
-          </>
-        ) : null}
       </p>
+      {telegramBotAvailable() ? (
+        <p className="trust-bar-telegram">
+          <TelegramDeskLink />
+        </p>
+      ) : null}
     </div>
   );
 }

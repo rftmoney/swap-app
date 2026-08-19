@@ -495,9 +495,17 @@ input {
   letter-spacing: 0.02em;
 }
 
-.telegram-desk-link,
-.footer-telegram-link {
-  color: inherit;
+.trust-bar-telegram {
+  margin: 0.45rem 0 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.telegram-desk-link {
+  color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition:
@@ -505,14 +513,9 @@ input {
     border-color 0.15s ease;
 }
 
-.telegram-desk-link:hover,
-.footer-telegram-link:hover {
+.telegram-desk-link:hover {
   color: var(--text);
   border-bottom-color: var(--line-strong);
-}
-
-.footer-telegram-link {
-  font-size: inherit;
 }
 
 .swap-panel,
