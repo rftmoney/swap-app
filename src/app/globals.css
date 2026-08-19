@@ -285,6 +285,11 @@ input {
   transition: color 0.15s ease;
 }
 
+.nav-telegram-link.nav-lead {
+  padding-right: 1.15rem;
+  border-right: 1px solid var(--line);
+}
+
 .nav-telegram-icon {
   width: 0.85rem;
   height: 0.85rem;

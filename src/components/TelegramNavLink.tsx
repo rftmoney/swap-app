@@ -19,7 +19,7 @@ export function TelegramNavLink() {
 
   return (
     <a
-      className="nav-telegram-link"
+      className="nav-telegram-link nav-lead"
       href={href}
       target="_blank"
       rel="noreferrer noopener"
