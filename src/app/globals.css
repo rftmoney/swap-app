@@ -1611,6 +1611,24 @@ input {
   flex: 0 0 auto;
 }
 
+.telegram-notify {
+  width: 100%;
+  margin-bottom: 0.35rem;
+}
+
+.telegram-notify-btn {
+  width: 100%;
+  margin-top: 0;
+}
+
+.telegram-notify-hint {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .deposit-actions {
   display: flex;
   align-items: center;

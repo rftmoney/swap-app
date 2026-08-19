@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getShift } from "@/lib/sideshift";
 import { verifyShiftToken } from "@/lib/shift-token";
+import { maybeNotifyShiftUpdate } from "@/lib/telegram-notify";
 import {
   clientIp,
   publicShift,
@@ -31,9 +32,20 @@ export async function GET(
     }
 
     const shift = await getShift(id);
+    const payload = publicShift(shift as unknown as Record<string, unknown>);
+
+    void maybeNotifyShiftUpdate({
+      id,
+      status: payload.status as string | undefined,
+      depositCoin: payload.depositCoin as string | undefined,
+      settleCoin: payload.settleCoin as string | undefined,
+      depositAmount: payload.depositAmount as string | undefined,
+      settleAmount: payload.settleAmount as string | undefined,
+    });
+
     return NextResponse.json(
       {
-        ...publicShift(shift as unknown as Record<string, unknown>),
+        ...payload,
         pollToken: request.headers.get("x-rift-shift-token"),
       },
       { headers: { "Cache-Control": "no-store" } },

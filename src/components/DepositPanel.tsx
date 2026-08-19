@@ -7,6 +7,7 @@ import {
   useLanguage,
 } from "@/components/LanguageProvider";
 import { SupportLink } from "@/components/SupportLink";
+import { TelegramNotifyButton } from "@/components/TelegramNotifyButton";
 import { privateRiftUrl } from "@/lib/rift-history";
 import type { Shift } from "@/lib/sideshift-shared";
 import { coinIconUrl } from "@/lib/sideshift-shared";
@@ -342,6 +343,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
         {phase === "awaiting" ? (
           <p className="muted">{t("depositHelp")}</p>
         ) : null}
+        {!isComplete && !isTerminal ? <TelegramNotifyButton shift={shift} /> : null}
         <div className="deposit-actions">
           <SupportLink label={t("support")} />
           {shift.pollToken ? (
