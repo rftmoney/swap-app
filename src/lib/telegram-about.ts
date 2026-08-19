@@ -1,25 +1,33 @@
 import { siteOrigin } from "@/lib/site-url";
 
-/** Shown in the bot profile “About” tab (max 512 chars). */
-export function telegramBotDescription() {
+/**
+ * Shown in the empty chat BEFORE the user taps START (setMyDescription, max 512).
+ * The round logo above this text is the bot profile photo — set in @BotFather.
+ */
+export function telegramPreStartWelcome() {
   return [
-    "Rift opens a path between chains — send on one network, receive on another, direct to your wallet.",
+    "RIFT",
+    "Enter one side. Exit another.",
     "",
-    "• Non-custodial — we never hold your funds",
-    "• No account or KYC required",
+    "Cross-chain crypto swaps — non-custodial, no account, direct to your wallet.",
+    "",
     "• 200+ assets across major networks",
-    "• Swap here in Telegram or on the web",
+    "• Open Swap from the menu after START",
     "• Optional alerts when your swap completes",
     "",
-    "Tap Open Swap in the menu to begin.",
-    "",
+    "Press START below to continue.",
     siteOrigin(),
   ].join("\n");
 }
 
-/** Shown under the bot name in search / profile (max 120 chars). */
+/** Bot profile / About tab (same welcome for consistency). */
+export function telegramBotDescription() {
+  return telegramPreStartWelcome();
+}
+
+/** Shown under the bot name in search and link previews (max 120). */
 export function telegramBotShortDescription() {
-  return "Cross-chain crypto swaps — non-custodial, no account, direct to your wallet. Tap Open Swap.";
+  return "Rift — cross-chain swaps. Non-custodial, no account. Press START, then Open Swap.";
 }
 
 /** Sent when the user runs /about or taps About. */
