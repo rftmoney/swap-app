@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
-import { fallbackRiftReply } from "@/lib/rift-chat-fallback";
-import { RIFT_CHAT_SYSTEM_PROMPT } from "@/lib/rift-knowledge";
+import {
+  fallbackRiftReply,
+  isChatLocale,
+  lumenSystemPrompt,
+  normalizeChatLocale,
+  type ChatLocale,
+} from "@/lib/rift-chat-locales";
 import {
   assertSameOrigin,
   clientIp,
@@ -16,6 +21,7 @@ type ChatMessage = {
 
 type ChatBody = {
   messages?: unknown;
+  locale?: unknown;
 };
 
 const MAX_MESSAGES = 12;
@@ -42,8 +48,15 @@ function sanitizeMessages(raw: unknown) {
   return messages;
 }
 
+function sanitizeLocale(raw: unknown): ChatLocale {
+  if (typeof raw !== "string") return "en";
+  const normalized = normalizeChatLocale(raw);
+  return isChatLocale(normalized) ? normalized : "en";
+}
+
 async function askOpenAi(
   apiKey: string,
+  locale: ChatLocale,
   messages: Array<{ role: "user" | "assistant"; content: string }>,
 ) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -54,9 +67,9 @@ async function askOpenAi(
     },
     body: JSON.stringify({
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      temperature: 0.4,
+      temperature: 0.55,
       max_tokens: 450,
-      messages: [{ role: "system", content: RIFT_CHAT_SYSTEM_PROMPT }, ...messages],
+      messages: [{ role: "system", content: lumenSystemPrompt(locale) }, ...messages],
     }),
     signal: AbortSignal.timeout(25_000),
   });
@@ -94,13 +107,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid chat messages" }, { status: 400 });
   }
 
+  const locale = sanitizeLocale(parsed.data.locale);
   const latest = messages[messages.length - 1]?.content ?? "";
   const apiKey = process.env.OPENAI_API_KEY;
 
   try {
     const reply = apiKey
-      ? await askOpenAi(apiKey, messages)
-      : fallbackRiftReply(latest);
+      ? await askOpenAi(apiKey, locale, messages)
+      : fallbackRiftReply(latest, locale);
 
     return NextResponse.json(
       { reply },
@@ -108,7 +122,7 @@ export async function POST(request: Request) {
     );
   } catch {
     return NextResponse.json(
-      { reply: fallbackRiftReply(latest) },
+      { reply: fallbackRiftReply(latest, locale) },
       { headers: { "Cache-Control": "no-store" } },
     );
   }

@@ -1,16 +1,21 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { LUMEN_GREETING } from "@/lib/rift-chat-fallback";
+import {
+  CHAT_LOCALE_CODES,
+  CHAT_LOCALE_LABELS,
+  detectBrowserChatLocale,
+  getChatCopy,
+  lumenGreeting,
+  normalizeChatLocale,
+  type ChatLocale,
+} from "@/lib/rift-chat-locales";
+
+const LOCALE_STORAGE_KEY = "rift-chat-locale";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
-};
-
-const STARTER: Message = {
-  role: "assistant",
-  content: LUMEN_GREETING,
 };
 
 function ChatIcon() {
@@ -27,13 +32,34 @@ function ChatIcon() {
   );
 }
 
+function readStoredLocale(): ChatLocale {
+  try {
+    const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (stored) return normalizeChatLocale(stored);
+  } catch {
+    /* storage blocked */
+  }
+  return detectBrowserChatLocale();
+}
+
 export function RiftChat() {
   const [open, setOpen] = useState(false);
+  const [locale, setLocale] = useState<ChatLocale>("en");
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([STARTER]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const copy = getChatCopy(locale);
+
+  useEffect(() => {
+    setLocale(readStoredLocale());
+  }, []);
+
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: lumenGreeting(locale) }]);
+    setError(null);
+  }, [locale]);
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +78,15 @@ export function RiftChat() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  function changeLocale(next: ChatLocale) {
+    setLocale(next);
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, next);
+    } catch {
+      /* storage blocked */
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const text = input.trim();
@@ -68,17 +103,18 @@ export function RiftChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          locale,
           messages: nextMessages.slice(1),
         }),
       });
       const data = (await response.json()) as { reply?: string; error?: string };
-      if (!response.ok) throw new Error(data.error || "Could not get a reply");
+      if (!response.ok) throw new Error(data.error || copy.error);
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: data.reply || "No response." },
+        { role: "assistant", content: data.reply || "…" },
       ]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not get a reply");
+      setError(err instanceof Error ? err.message : copy.error);
     } finally {
       setSending(false);
     }
@@ -93,14 +129,30 @@ export function RiftChat() {
               <p className="rift-chat-kicker">Rift support</p>
               <h2>Lumen</h2>
             </div>
-            <button
-              type="button"
-              className="rift-chat-close"
-              aria-label="Close chat"
-              onClick={() => setOpen(false)}
-            >
-              ×
-            </button>
+            <div className="rift-chat-header-actions">
+              <label className="rift-chat-lang">
+                <span className="sr-only">{copy.language}</span>
+                <select
+                  value={locale}
+                  onChange={(event) => changeLocale(event.target.value as ChatLocale)}
+                  aria-label={copy.language}
+                >
+                  {CHAT_LOCALE_CODES.map((code) => (
+                    <option key={code} value={code}>
+                      {CHAT_LOCALE_LABELS[code].native}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="rift-chat-close"
+                aria-label={copy.close}
+                onClick={() => setOpen(false)}
+              >
+                ×
+              </button>
+            </div>
           </header>
 
           <div className="rift-chat-messages" ref={scrollRef}>
@@ -112,7 +164,9 @@ export function RiftChat() {
                 {message.content}
               </p>
             ))}
-            {sending ? <p className="rift-chat-bubble is-assistant is-typing">…</p> : null}
+            {sending ? (
+              <p className="rift-chat-bubble is-assistant is-typing">{copy.typing}</p>
+            ) : null}
             {error ? <p className="rift-chat-error">{error}</p> : null}
           </div>
 
@@ -120,13 +174,13 @@ export function RiftChat() {
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Ask Lumen anything about Rift…"
+              placeholder={copy.placeholder}
               maxLength={1200}
               autoComplete="off"
               disabled={sending}
             />
             <button type="submit" disabled={sending || !input.trim()}>
-              Send
+              {copy.send}
             </button>
           </form>
         </section>
@@ -136,7 +190,7 @@ export function RiftChat() {
         type="button"
         className="rift-chat-launcher"
         aria-expanded={open}
-        aria-label={open ? "Close chat with Lumen" : "Chat with Lumen"}
+        aria-label={open ? copy.launcherClose : copy.launcherOpen}
         onClick={() => setOpen((value) => !value)}
       >
         {open ? "×" : <ChatIcon />}
