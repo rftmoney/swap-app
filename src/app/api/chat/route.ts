@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fallbackRiftReply } from "@/lib/rift-chat-fallback";
 import { RIFT_CHAT_SYSTEM_PROMPT } from "@/lib/rift-knowledge";
 import {
   assertSameOrigin,
@@ -41,6 +42,39 @@ function sanitizeMessages(raw: unknown) {
   return messages;
 }
 
+async function askOpenAi(
+  apiKey: string,
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
+) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      temperature: 0.4,
+      max_tokens: 450,
+      messages: [{ role: "system", content: RIFT_CHAT_SYSTEM_PROMPT }, ...messages],
+    }),
+    signal: AbortSignal.timeout(25_000),
+  });
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "Assistant unavailable");
+  }
+
+  const reply = data.choices?.[0]?.message?.content?.trim();
+  if (!reply) throw new Error("Empty assistant response");
+  return reply;
+}
+
 export async function POST(request: Request) {
   const ip = clientIp(request);
   const limited = await rateLimit(`chat:${ip}`, 20, 60_000);
@@ -48,17 +82,6 @@ export async function POST(request: Request) {
 
   if (!assertSameOrigin(request)) {
     return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      {
-        error:
-          "The assistant is not connected yet. Use Telegram support or read /docs.",
-      },
-      { status: 503 },
-    );
   }
 
   const parsed = await readJsonBody<ChatBody>(request, 16_384);
@@ -71,33 +94,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid chat messages" }, { status: 400 });
   }
 
+  const latest = messages[messages.length - 1]?.content ?? "";
+  const apiKey = process.env.OPENAI_API_KEY;
+
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-        temperature: 0.4,
-        max_tokens: 450,
-        messages: [{ role: "system", content: RIFT_CHAT_SYSTEM_PROMPT }, ...messages],
-      }),
-      signal: AbortSignal.timeout(25_000),
-    });
-
-    const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-      error?: { message?: string };
-    };
-
-    if (!response.ok) {
-      throw new Error(data.error?.message || "Assistant unavailable");
-    }
-
-    const reply = data.choices?.[0]?.message?.content?.trim();
-    if (!reply) throw new Error("Empty assistant response");
+    const reply = apiKey
+      ? await askOpenAi(apiKey, messages)
+      : fallbackRiftReply(latest);
 
     return NextResponse.json(
       { reply },
@@ -105,8 +108,8 @@ export async function POST(request: Request) {
     );
   } catch {
     return NextResponse.json(
-      { error: "Could not reach the assistant. Try again shortly." },
-      { status: 502 },
+      { reply: fallbackRiftReply(latest) },
+      { headers: { "Cache-Control": "no-store" } },
     );
   }
 }

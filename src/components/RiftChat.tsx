@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { LUMEN_GREETING } from "@/lib/rift-chat-fallback";
 
 type Message = {
   role: "user" | "assistant";
@@ -9,9 +10,22 @@ type Message = {
 
 const STARTER: Message = {
   role: "assistant",
-  content:
-    "Hi — I’m the Rift assistant. Ask about swaps, deposit status, wallets, recovery links, or how the site works.",
+  content: LUMEN_GREETING,
 };
+
+function ChatIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M4 5.5A2.5 2.5 0 016.5 3h11A2.5 2.5 0 0120 5.5v7A2.5 2.5 0 0117.5 15H10l-4.8 3.2a.75.75 0 01-1.15-.64V15H6.5A2.5 2.5 0 014 12.5v-7z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function RiftChat() {
   const [open, setOpen] = useState(false);
@@ -58,13 +72,13 @@ export function RiftChat() {
         }),
       });
       const data = (await response.json()) as { reply?: string; error?: string };
-      if (!response.ok) throw new Error(data.error || "Assistant unavailable");
+      if (!response.ok) throw new Error(data.error || "Could not get a reply");
       setMessages((current) => [
         ...current,
         { role: "assistant", content: data.reply || "No response." },
       ]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Assistant unavailable");
+      setError(err instanceof Error ? err.message : "Could not get a reply");
     } finally {
       setSending(false);
     }
@@ -73,16 +87,16 @@ export function RiftChat() {
   return (
     <div className={`rift-chat${open ? " is-open" : ""}`}>
       {open ? (
-        <section className="rift-chat-panel" role="dialog" aria-label="Rift assistant">
+        <section className="rift-chat-panel" role="dialog" aria-label="Lumen support chat">
           <header className="rift-chat-header">
             <div>
-              <p className="rift-chat-kicker">Rift</p>
-              <h2>Assistant</h2>
+              <p className="rift-chat-kicker">Rift support</p>
+              <h2>Lumen</h2>
             </div>
             <button
               type="button"
               className="rift-chat-close"
-              aria-label="Close assistant"
+              aria-label="Close chat"
               onClick={() => setOpen(false)}
             >
               ×
@@ -106,7 +120,7 @@ export function RiftChat() {
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Ask about swaps, status, wallets…"
+              placeholder="Ask Lumen anything about Rift…"
               maxLength={1200}
               autoComplete="off"
               disabled={sending}
@@ -122,10 +136,10 @@ export function RiftChat() {
         type="button"
         className="rift-chat-launcher"
         aria-expanded={open}
-        aria-label={open ? "Close assistant" : "Open assistant"}
+        aria-label={open ? "Close chat with Lumen" : "Chat with Lumen"}
         onClick={() => setOpen((value) => !value)}
       >
-        {open ? "×" : "?"}
+        {open ? "×" : <ChatIcon />}
       </button>
     </div>
   );

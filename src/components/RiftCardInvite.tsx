@@ -10,7 +10,7 @@ const DISMISSED_KEY = "rift-card-invite-dismissed";
 
 export function RiftCardInvite() {
   const { t } = useLanguage();
-  const [phase, setPhase] = useState<"pending" | "open" | "closed">("pending");
+  const [phase, setPhase] = useState<"pending" | "open" | "hidden">("pending");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -25,10 +25,11 @@ export function RiftCardInvite() {
       // Storage may be unavailable in hardened/private browser contexts.
     }
     const mobile = window.matchMedia("(max-width: 768px)").matches;
-    const timer = window.setTimeout(
-      () => setPhase(dismissed || mobile ? "closed" : "open"),
-      dismissed || mobile ? 0 : 900,
-    );
+    if (dismissed || mobile) {
+      setPhase("hidden");
+      return;
+    }
+    const timer = window.setTimeout(() => setPhase("open"), 900);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -47,16 +48,7 @@ export function RiftCardInvite() {
     } catch {
       // Closing the dialog must still work when storage is blocked.
     }
-    setPhase("closed");
-  }
-
-  function open() {
-    try {
-      window.sessionStorage.removeItem(DISMISSED_KEY);
-    } catch {
-      // Reopening must work when storage is blocked.
-    }
-    setPhase("open");
+    setPhase("hidden");
   }
 
   async function joinWaitlist(event: FormEvent<HTMLFormElement>) {
@@ -87,26 +79,7 @@ export function RiftCardInvite() {
     }
   }
 
-  if (phase === "pending") return null;
-
-  if (phase === "closed") {
-    return (
-      <button
-        type="button"
-        className="card-invite-launcher"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-        onClick={open}
-      >
-        <Image src={cardArt} alt="" width={64} height={40} quality={95} />
-        <span>
-          <small>{t("cardEarly")}</small>
-          <strong>Rift Card</strong>
-        </span>
-        <b aria-hidden>←</b>
-      </button>
-    );
-  }
+  if (phase !== "open") return null;
 
   return (
     <aside
