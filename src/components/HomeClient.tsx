@@ -6,7 +6,7 @@ import Link from "next/link";
 import { DeskClock } from "@/components/DeskClock";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { RiftCardInvite } from "@/components/RiftCardInvite";
-import { TelegramHeroNote } from "@/components/TelegramHeroNote";
+import { TelegramNavLink } from "@/components/TelegramNavLink";
 import { SwapWidget } from "@/components/SwapWidget";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
@@ -43,6 +43,7 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
         </Link>
         <nav className="top-nav" aria-label="Main navigation">
           <DeskClock />
+          <TelegramNavLink />
           <Link href="/rift">{t("myRifts")}</Link>
           <Link href="/card">Card</Link>
           <Link className="nav-button" href="/docs">
@@ -68,7 +69,6 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
               <span>{t("heroLine2")}</span>
             </h1>
             <p>{t("heroBody")}</p>
-            <TelegramHeroNote />
             <ul className="hero-stats" aria-label="How Rift settles">
               <li>{t("nonCustodial")}</li>
               <li>{t("directWallet")}</li>

@@ -277,13 +277,29 @@ input {
   height: 0.42rem;
 }
 
+.nav-telegram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.nav-telegram-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 0.85rem;
+}
+
 .top-nav > a:not(.nav-button),
+.nav-telegram-link,
 .legal-nav > a:not(.nav-button),
 .footer-links a {
   color: var(--muted);
 }
 
 .top-nav > a:not(.nav-button):hover,
+.nav-telegram-link:hover,
 .legal-nav > a:not(.nav-button):hover,
 .footer-links a:hover {
   color: var(--text);
@@ -426,24 +442,6 @@ input {
 .hero-stats li + li {
   padding-left: 0.9rem;
   border-left: 1px solid var(--line);
-}
-
-.hero-telegram {
-  margin: 1.35rem auto 0;
-  max-width: 36ch;
-  padding: 0.85rem 0 0;
-  border-top: 1px solid var(--line);
-  text-align: center;
-}
-
-.hero-telegram-kicker {
-  margin: 0 0 0.45rem;
-  color: var(--text);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.62rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
 }
 
 .swap-panel,
