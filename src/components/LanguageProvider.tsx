@@ -108,6 +108,27 @@ const copy = {
     received: "Received",
     time: "Time",
     private: "Private",
+    riftTracking: "Rift tracking",
+    riftTrackingHint: "Bookmark or share this link to recover this swap.",
+    statusStepWaiting: "Awaiting deposit",
+    statusStepPending: "Confirming",
+    statusStepProcessing: "Processing",
+    statusStepSettling: "Sending",
+    statusStepDone: "Done",
+    statusMsgWaiting:
+      "Send crypto to the deposit address below. This page updates automatically when your transfer arrives.",
+    statusMsgPending:
+      "Deposit detected — waiting for blockchain confirmations.",
+    statusMsgProcessing: "Confirmations received — executing your swap.",
+    statusMsgSettling: "Sending funds to your wallet.",
+    statusMsgSettled: "Swap complete. Funds were sent to your wallet.",
+    statusMsgRefund: "A refund is being processed to your wallet.",
+    statusMsgRefunded: "Funds were refunded.",
+    statusMsgExpired: "This Rift expired before a valid deposit was completed.",
+    statusMsgMultiple: "Multiple deposits detected — support may be required.",
+    depositDetected: "Deposit detected",
+    checkingStatus: "Checking status…",
+    pollError: "Could not refresh status. Use Refresh or open your tracking link.",
 } as const;
 
 export type TranslationKey = keyof typeof copy;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   type TranslationKey,
@@ -29,12 +29,58 @@ const STATUS_COPY: Record<string, TranslationKey> = {
   multiple: "multiple",
 };
 
+const STATUS_MESSAGE: Record<string, TranslationKey> = {
+  waiting: "statusMsgWaiting",
+  pending: "statusMsgPending",
+  processing: "statusMsgProcessing",
+  settling: "statusMsgSettling",
+  settled: "statusMsgSettled",
+  refund: "statusMsgRefund",
+  refunded: "statusMsgRefunded",
+  expired: "statusMsgExpired",
+  multiple: "statusMsgMultiple",
+};
+
+const STATUS_STEP: Record<string, number> = {
+  waiting: 0,
+  pending: 1,
+  processing: 2,
+  settling: 3,
+  settled: 4,
+  refunded: 4,
+  expired: 4,
+  refund: 3,
+  multiple: 2,
+};
+
+const STEPS: TranslationKey[] = [
+  "statusStepWaiting",
+  "statusStepPending",
+  "statusStepProcessing",
+  "statusStepSettling",
+  "statusStepDone",
+];
+
 export function DepositPanel({ shift, onBack, onRefresh }: Props) {
   const { locale, t } = useLanguage();
   const status = shift.status?.toLowerCase() ?? "waiting";
   const done = ["settled", "refunded", "expired"].includes(status);
+  const activeStep = STATUS_STEP[status] ?? 0;
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [pollError, setPollError] = useState(false);
+  const [depositFlash, setDepositFlash] = useState(false);
+  const prevStatus = useRef(status);
+  const prevDepositAmount = useRef(shift.depositAmount);
+
+  const trackingPath = `/rift/${encodeURIComponent(shift.id)}`;
+  const trackingHost =
+    typeof window !== "undefined" ? window.location.host : "rft.money";
+  const trackingDisplay = `${trackingHost}${trackingPath}`;
+  const trackingCopy =
+    shift.pollToken && typeof window !== "undefined"
+      ? privateRiftUrl(shift.id, shift.pollToken)
+      : `https://${trackingDisplay}`;
 
   useEffect(() => {
     if (done) return;
@@ -47,16 +93,62 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
           cache: "no-store",
         });
         const data = await res.json();
-        if (res.ok) onRefresh(data);
+        if (!res.ok) {
+          setPollError(true);
+          return;
+        }
+        setPollError(false);
+        onRefresh(data);
       } catch {
-        /* ignore transient poll errors */
+        setPollError(true);
       }
-    }, 8000);
+    }, 5000);
     return () => window.clearInterval(timer);
   }, [done, onRefresh, shift.id, shift.pollToken]);
 
+  useEffect(() => {
+    const statusChanged = prevStatus.current !== status;
+    const depositArrived =
+      !prevDepositAmount.current && Boolean(shift.depositAmount);
+
+    if ((statusChanged && status !== "waiting") || depositArrived) {
+      setDepositFlash(true);
+      const timer = window.setTimeout(() => setDepositFlash(false), 2400);
+      prevStatus.current = status;
+      prevDepositAmount.current = shift.depositAmount;
+      return () => window.clearTimeout(timer);
+    }
+
+    prevStatus.current = status;
+    prevDepositAmount.current = shift.depositAmount;
+  }, [shift.depositAmount, status]);
+
+  async function refreshShift() {
+    setRefreshing(true);
+    try {
+      const res = await fetch(`/api/shift/${shift.id}`, {
+        headers: shift.pollToken
+          ? { "x-rift-shift-token": shift.pollToken }
+          : undefined,
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPollError(false);
+        onRefresh(data);
+      } else {
+        setPollError(true);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   return (
-    <section className="deposit-panel" aria-live="polite">
+    <section
+      className={`deposit-panel${depositFlash ? " is-updated" : ""}`}
+      aria-live="polite"
+    >
       <header className="deposit-header">
         <button type="button" className="ghost-btn" onClick={onBack}>
           ← {t("newRift")}
@@ -66,6 +158,48 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
           {STATUS_COPY[status] ? t(STATUS_COPY[status]) : status}
         </p>
       </header>
+
+      <div className="rift-status-banner" role="status">
+        <p className="rift-status-headline">
+          {STATUS_COPY[status] ? t(STATUS_COPY[status]) : status}
+          {!done && !pollError ? (
+            <span className="rift-status-live">{t("checkingStatus")}</span>
+          ) : null}
+        </p>
+        <p className="rift-status-detail">
+          {STATUS_MESSAGE[status] ? t(STATUS_MESSAGE[status]) : t("statusMsgWaiting")}
+        </p>
+        {shift.depositAmount ? (
+          <p className="rift-deposit-detected">
+            {t("depositDetected")}:{" "}
+            <strong>
+              {shift.depositAmount} {shift.depositCoin.toUpperCase()}
+            </strong>
+          </p>
+        ) : null}
+        {pollError ? (
+          <p className="form-error rift-poll-error">{t("pollError")}</p>
+        ) : null}
+      </div>
+
+      <ol className="rift-progress" aria-label="Swap progress">
+        {STEPS.map((label, index) => {
+          const state =
+            index < activeStep
+              ? "complete"
+              : index === activeStep
+                ? done && index === STEPS.length - 1
+                  ? "complete"
+                  : "active"
+                : "upcoming";
+          return (
+            <li key={label} className={`rift-progress-step is-${state}`}>
+              <span className="rift-progress-marker" aria-hidden />
+              <span>{t(label)}</span>
+            </li>
+          );
+        })}
+      </ol>
 
       <div className="route">
         <div className="route-side">
@@ -117,6 +251,17 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
 
         <div className="deposit-fields">
           <div className="deposit-field">
+            <span className="field-label">{t("riftTracking")}</span>
+            <CopyRow
+              value={trackingDisplay}
+              copy={t("copy")}
+              copied={t("copied")}
+              copyValue={trackingCopy}
+            />
+            <p className="rift-tracking-hint">{t("riftTrackingHint")}</p>
+          </div>
+
+          <div className="deposit-field">
             <span className="field-label">{t("depositAddress")}</span>
             <CopyRow value={shift.depositAddress} copy={t("copy")} copied={t("copied")} />
           </div>
@@ -144,6 +289,10 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
               <dd>{shift.depositNetwork}</dd>
             </div>
             <div>
+              <dt>Rift ID</dt>
+              <dd title={shift.id}>{truncate(shift.id, 22)}</dd>
+            </div>
+            <div>
               <dt>{t("settlingTo")}</dt>
               <dd title={shift.settleAddress}>
                 {truncate(shift.settleAddress)}
@@ -167,9 +316,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
       </div>
 
       <footer className="deposit-footer">
-        <p className="muted">
-          {t("depositHelp")}
-        </p>
+        <p className="muted">{t("depositHelp")}</p>
         <div className="deposit-actions">
           <SupportLink label={t("support")} />
           {shift.pollToken ? (
@@ -192,21 +339,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
               type="button"
               className="secondary-btn"
               disabled={refreshing}
-              onClick={async () => {
-                setRefreshing(true);
-                try {
-                  const res = await fetch(`/api/shift/${shift.id}`, {
-                    headers: shift.pollToken
-                      ? { "x-rift-shift-token": shift.pollToken }
-                      : undefined,
-                    cache: "no-store",
-                  });
-                  const data = await res.json();
-                  if (res.ok) onRefresh(data);
-                } finally {
-                  setRefreshing(false);
-                }
-              }}
+              onClick={refreshShift}
             >
               {refreshing ? t("checking") : t("refresh")}
             </button>
@@ -230,8 +363,8 @@ function AssetIcon({ coin }: { coin: string }) {
   );
 }
 
-function truncate(value: string) {
-  if (value.length <= 18) return value;
+function truncate(value: string, max = 18) {
+  if (value.length <= max) return value;
   return `${value.slice(0, 10)}…${value.slice(-6)}`;
 }
 
@@ -239,10 +372,12 @@ function CopyRow({
   value,
   copy,
   copied: copiedLabel,
+  copyValue,
 }: {
   value: string;
   copy: string;
   copied: string;
+  copyValue?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -252,7 +387,7 @@ function CopyRow({
       <button
         type="button"
         onClick={async () => {
-          await navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(copyValue ?? value);
           setCopied(true);
           window.setTimeout(() => setCopied(false), 1600);
         }}
