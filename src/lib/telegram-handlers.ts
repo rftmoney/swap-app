@@ -39,6 +39,7 @@ function mainMenuKeyboard(): TelegramInlineKeyboard {
         { text: "About", callback_data: "about" },
         { text: "Help", callback_data: "help" },
       ],
+      [{ text: "Website", url: site }],
     ],
   };
 }
