@@ -11,9 +11,16 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  const isApi = request.nextUrl.pathname.startsWith("/api/");
+  const pathname = request.nextUrl.pathname;
+  const isTelegramApp =
+    pathname === "/telegram" || pathname.startsWith("/telegram/");
+  const isApi = pathname.startsWith("/api/");
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const csp = isApi ? apiContentSecurityPolicy() : pageContentSecurityPolicy(nonce);
+  const csp = isApi
+    ? apiContentSecurityPolicy()
+    : isTelegramApp
+      ? telegramPageContentSecurityPolicy(nonce)
+      : pageContentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
 
   if (!isApi) {
@@ -29,7 +36,9 @@ export function proxy(request: NextRequest) {
 
   response.headers.set("Content-Security-Policy", csp);
   response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", "DENY");
+  if (!isTelegramApp) {
+    response.headers.set("X-Frame-Options", "DENY");
+  }
   response.headers.set("Referrer-Policy", "no-referrer");
   response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
   response.headers.delete("Server");
@@ -46,6 +55,26 @@ export function proxy(request: NextRequest) {
   }
 
   return response;
+}
+
+function telegramPageContentSecurityPolicy(nonce: string) {
+  const isDev = process.env.NODE_ENV !== "production";
+  return [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors https://web.telegram.org https://*.telegram.org",
+    "object-src 'none'",
+    "img-src 'self' data: blob: https://sideshift.ai",
+    "font-src 'self' data:",
+    `script-src 'self' 'nonce-${nonce}' https://telegram.org 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    `style-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-inline'" : ""}`,
+    "connect-src 'self' https://telegram.org",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "media-src 'none'",
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  ].join("; ");
 }
 
 function pageContentSecurityPolicy(nonce: string) {

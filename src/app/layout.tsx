@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Sora } from "next/font/google";
 import { connection } from "next/server";
-import { MarketTicker } from "@/components/MarketTicker";
-import { RiftChat } from "@/components/RiftChat";
+import { SiteChrome } from "@/components/SiteChrome";
 import { buildSiteMetadata, siteFaqJsonLd } from "@/lib/swap-seo";
 import "./globals.css";
 
@@ -36,9 +35,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
-        <MarketTicker />
-        {children}
-        <RiftChat />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

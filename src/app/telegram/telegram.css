@@ -1,0 +1,48 @@
+.telegram-shell {
+  min-height: 100dvh;
+  background: #000;
+  color: #fff;
+}
+
+.telegram-app {
+  width: min(100%, 28rem);
+  margin: 0 auto;
+  padding: 1rem 0.85rem 1.5rem;
+}
+
+.telegram-app-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.telegram-app-kicker {
+  margin: 0 0 0.35rem;
+  color: #767676;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.telegram-app-header h1 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.telegram-app-header p {
+  margin: 0;
+  color: #767676;
+  font-size: 0.78rem;
+}
+
+.telegram-app .swap-panel {
+  margin-top: 0;
+  padding: 1rem;
+}
+
+.telegram-app .primary-btn {
+  margin-top: 0.85rem;
+}

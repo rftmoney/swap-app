@@ -158,13 +158,3 @@ export async function maybeNotifyShiftUpdate(shift: NotifyShift) {
     await kvSet(sentKey, "1", WATCH_TTL_SEC);
   }
 }
-
-export function telegramWelcomeMessage() {
-  return [
-    "You're connected to Rift alerts.",
-    "",
-    "We'll message you here when your swap completes.",
-    "",
-    "You can close this chat — no need to stay on the site.",
-  ].join("\n");
-}
