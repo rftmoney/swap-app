@@ -3,4 +3,5 @@ Allow: /
 Allow: /docs
 Allow: /terms
 Allow: /privacy
+Allow: /swap/
 Disallow: /api/

@@ -6,6 +6,7 @@ import { DepositPanel } from "@/components/DepositPanel";
 import { useLanguage } from "@/components/LanguageProvider";
 import { SettleAddressField } from "@/components/SettleAddressField";
 import { saveRift } from "@/lib/rift-history";
+import type { PopularPair } from "@/lib/popular-pairs";
 import {
   formatPairAsset,
   pickPreferredNetwork,
@@ -16,26 +17,44 @@ import {
 
 const POPULAR = ["btc", "eth", "usdt", "usdc", "sol", "xrp", "ltc", "bnb"];
 
-function pickDefault(
+function resolveNetwork(
   coins: SideShiftCoin[],
-  preferred: string,
-  fallback: string,
+  coin: string,
+  network: string,
 ) {
-  const hit =
-    coins.find((c) => c.coin === preferred) ??
-    coins.find((c) => c.coin === fallback) ??
-    coins[0];
+  const asset = coins.find((item) => item.coin === coin);
+  if (!asset) return network;
+  if (asset.networks.includes(network)) return network;
+  return pickPreferredNetwork(asset.networks);
+}
+
+function applyPopularPair(
+  coins: SideShiftCoin[],
+  pair: PopularPair,
+) {
   return {
-    coin: hit?.coin ?? preferred,
-    network: pickPreferredNetwork(hit?.networks ?? []),
+    fromCoin: pair.from.coin,
+    fromNetwork: resolveNetwork(coins, pair.from.coin, pair.from.network),
+    toCoin: pair.to.coin,
+    toNetwork: resolveNetwork(coins, pair.to.coin, pair.to.network),
   };
 }
 
 type SwapWidgetProps = {
   onRiftChange?: (open: boolean) => void;
+  initialPair?: PopularPair;
+  pairPreset?: PopularPair | null;
+  onPairPresetApplied?: () => void;
+  onPairChange?: (pair: PopularPair) => void;
 };
 
-export function SwapWidget({ onRiftChange }: SwapWidgetProps) {
+export function SwapWidget({
+  onRiftChange,
+  initialPair,
+  pairPreset,
+  onPairPresetApplied,
+  onPairChange,
+}: SwapWidgetProps) {
   const { t } = useLanguage();
   const [coins, setCoins] = useState<SideShiftCoin[]>([]);
   const [loadingCoins, setLoadingCoins] = useState(true);
@@ -88,12 +107,20 @@ export function SwapWidget({ onRiftChange }: SwapWidgetProps) {
           return ai - bi;
         });
         setCoins(list);
-        const from = pickDefault(list, "btc", "eth");
-        const to = pickDefault(list, "eth", "usdt");
-        setFromCoin(from.coin);
-        setFromNetwork(from.network);
-        setToCoin(to.coin);
-        setToNetwork(to.network);
+        const seed = initialPair
+          ? applyPopularPair(list, initialPair)
+          : {
+              ...applyPopularPair(list, {
+                slug: "btc-to-eth",
+                label: "BTC → ETH",
+                from: { coin: "btc", network: "bitcoin" },
+                to: { coin: "eth", network: "ethereum" },
+              }),
+            };
+        setFromCoin(seed.fromCoin);
+        setFromNetwork(seed.fromNetwork);
+        setToCoin(seed.toCoin);
+        setToNetwork(seed.toNetwork);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load coins");
@@ -105,7 +132,23 @@ export function SwapWidget({ onRiftChange }: SwapWidgetProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialPair]);
+
+  useEffect(() => {
+    if (!pairPreset || !coins.length) return;
+    const next = applyPopularPair(coins, pairPreset);
+    setPair(null);
+    setFromCoin(next.fromCoin);
+    setFromNetwork(next.fromNetwork);
+    setToCoin(next.toCoin);
+    setToNetwork(next.toNetwork);
+    setAmount("");
+    setSettleMemo("");
+    setConfirmingAddress(false);
+    setConfirmationSuffix("");
+    onPairChange?.(pairPreset);
+    onPairPresetApplied?.();
+  }, [pairPreset, coins, onPairChange, onPairPresetApplied]);
 
   const fromAsset = useMemo(
     () => formatPairAsset(fromCoin, fromNetwork),

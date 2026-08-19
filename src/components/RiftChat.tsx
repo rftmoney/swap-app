@@ -131,15 +131,15 @@ export function RiftChat() {
             </div>
             <div className="rift-chat-header-actions">
               <label className="rift-chat-lang">
-                <span className="sr-only">{copy.language}</span>
+                <span className="sr-only">Language</span>
                 <select
                   value={locale}
                   onChange={(event) => changeLocale(event.target.value as ChatLocale)}
-                  aria-label={copy.language}
+                  aria-label="Language"
                 >
                   {CHAT_LOCALE_CODES.map((code) => (
                     <option key={code} value={code}>
-                      {CHAT_LOCALE_LABELS[code].native}
+                      {CHAT_LOCALE_LABELS[code].label}
                     </option>
                   ))}
                 </select>
