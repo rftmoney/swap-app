@@ -70,11 +70,11 @@ export default function PrivacyPage() {
       <section>
         <h2>6. Cookies and analytics</h2>
         <p>
-          Rift does not require login cookies. Essential technical storage may
-          be used by the browser for dismissed interface notices and private
-          Rift recovery tokens. Recovery data remains on your device unless you
-          clear browser storage. If analytics are added later, this policy will
-          be updated.
+          Rift does not require login cookies. Fonts are self-hosted — no
+          requests to Google Fonts. Essential technical storage may be used by
+          the browser for dismissed interface notices and private Rift recovery
+          tokens. Recovery data remains on your device unless you clear browser
+          storage. If analytics are added later, this policy will be updated.
         </p>
       </section>
 
