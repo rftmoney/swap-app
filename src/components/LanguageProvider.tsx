@@ -101,12 +101,6 @@ const copy = {
     cardFeature2: "Retire when finished",
     cardFeature3: "Request another",
     comingSoon: "Product details and availability may change before launch.",
-    support: "Telegram support",
-    telegramNotify: "Connect Telegram alerts",
-    telegramNotifyHint:
-      "Opens @Rftmoneybot to enable a completion message for this swap.",
-    telegramNotifyOpening: "Opening Telegram…",
-    telegramNotifyUnavailable: "Telegram alerts are not available right now.",
     searchCoin: "Search coin…",
     swapAssets: "Swap assets",
     tape: "Tape",

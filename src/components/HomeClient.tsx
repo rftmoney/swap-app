@@ -3,9 +3,9 @@
 import { useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { DeskClock } from "@/components/DeskClock";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { RiftCardInvite } from "@/components/RiftCardInvite";
-import { TelegramNavLink } from "@/components/TelegramNavLink";
 import { SwapWidget } from "@/components/SwapWidget";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
@@ -41,7 +41,7 @@ export function HomeClient({ initialPair = DEFAULT_FEATURED_PAIR }: HomeClientPr
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="top-nav" aria-label="Main navigation">
-          <TelegramNavLink />
+          <DeskClock />
           <Link href="/rift">{t("myRifts")}</Link>
           <Link href="/card">Card</Link>
           <Link className="nav-button" href="/docs">

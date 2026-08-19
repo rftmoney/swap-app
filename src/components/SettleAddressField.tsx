@@ -3,11 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { looksLikeDomainName } from "@/lib/networks";
-import {
-  availableWallets,
-  connectWalletAddress,
-  type WalletKind,
-} from "@/lib/wallets";
 
 type Props = {
   coin: string;
@@ -15,11 +10,6 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   onResolved?: (meta: { name: string; service: string } | null) => void;
-};
-
-const WALLET_LABEL: Record<WalletKind, string> = {
-  metamask: "MetaMask",
-  phantom: "Phantom",
 };
 
 export function SettleAddressField({
@@ -30,16 +20,10 @@ export function SettleAddressField({
   onResolved,
 }: Props) {
   const { t } = useLanguage();
-  const [wallets, setWallets] = useState<WalletKind[]>([]);
-  const [walletBusy, setWalletBusy] = useState<WalletKind | null>(null);
   const [resolving, setResolving] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const resolveSeq = useRef(0);
-
-  useEffect(() => {
-    setWallets(availableWallets(network));
-  }, [network]);
 
   useEffect(() => {
     const trimmed = value.trim();
@@ -87,21 +71,6 @@ export function SettleAddressField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, coin, network]);
 
-  async function onWallet(kind: WalletKind) {
-    setWalletBusy(kind);
-    setError(null);
-    try {
-      const address = await connectWalletAddress(kind, network);
-      onChange(address);
-      setHint(t("walletFilled", { wallet: WALLET_LABEL[kind] }));
-      onResolved?.(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("walletFailed"));
-    } finally {
-      setWalletBusy(null);
-    }
-  }
-
   return (
     <div className="settle-address">
       <label className="address-field">
@@ -121,25 +90,8 @@ export function SettleAddressField({
         />
       </label>
 
-      {(wallets.length > 0 || resolving || hint || error) && (
+      {(resolving || hint || error) && (
         <div className="settle-assist">
-          {wallets.length > 0 ? (
-            <div className="wallet-actions" aria-label={t("connectWallet")}>
-              {wallets.map((wallet) => (
-                <button
-                  key={wallet}
-                  type="button"
-                  className="ghost-btn wallet-btn"
-                  disabled={walletBusy !== null || resolving}
-                  onClick={() => onWallet(wallet)}
-                >
-                  {walletBusy === wallet
-                    ? t("connectingWallet")
-                    : WALLET_LABEL[wallet]}
-                </button>
-              ))}
-            </div>
-          ) : null}
           {resolving ? <p className="settle-hint">{t("resolvingName")}</p> : null}
           {!resolving && hint ? <p className="settle-hint">{hint}</p> : null}
           {error ? <p className="form-error settle-error">{error}</p> : null}

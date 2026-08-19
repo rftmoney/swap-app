@@ -47,7 +47,9 @@ export function TelegramSwapClient() {
         </div>
         <p>Non-custodial · Direct to wallet</p>
       </header>
-      <SwapWidget />
+      <div className="telegram-swap-desk">
+        <SwapWidget />
+      </div>
     </main>
   );
 }

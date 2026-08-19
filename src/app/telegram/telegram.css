@@ -5,9 +5,14 @@
 }
 
 .telegram-app {
-  width: min(100%, 32rem);
+  width: min(100%, 26rem);
   margin: 0 auto;
-  padding: 1rem 0.75rem 1.5rem;
+  padding: 1rem 0.85rem 1.5rem;
+}
+
+.telegram-swap-desk {
+  width: min(100%, 24rem);
+  margin: 0 auto;
 }
 
 .telegram-app-header {
@@ -61,7 +66,11 @@
 
 .telegram-app .swap-panel {
   margin-top: 0;
-  padding: 1rem;
+  padding: 0.85rem;
+}
+
+.telegram-app .deposit-panel {
+  padding: 0.85rem;
 }
 
 .telegram-app .primary-btn {
