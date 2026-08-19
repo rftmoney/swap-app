@@ -4,6 +4,7 @@ import {
   isChatLocale,
   lumenSystemPrompt,
   normalizeChatLocale,
+  DEFAULT_CHAT_LOCALE,
   type ChatLocale,
 } from "@/lib/rift-chat-locales";
 import {
@@ -49,9 +50,9 @@ function sanitizeMessages(raw: unknown) {
 }
 
 function sanitizeLocale(raw: unknown): ChatLocale {
-  if (typeof raw !== "string") return "en";
+  if (typeof raw !== "string") return DEFAULT_CHAT_LOCALE;
   const normalized = normalizeChatLocale(raw);
-  return isChatLocale(normalized) ? normalized : "en";
+  return isChatLocale(normalized) ? normalized : DEFAULT_CHAT_LOCALE;
 }
 
 async function askOpenAi(

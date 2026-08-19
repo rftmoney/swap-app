@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   CHAT_LOCALE_CODES,
   CHAT_LOCALE_LABELS,
-  detectBrowserChatLocale,
+  DEFAULT_CHAT_LOCALE,
   getChatCopy,
   lumenGreeting,
   normalizeChatLocale,
@@ -39,12 +39,12 @@ function readStoredLocale(): ChatLocale {
   } catch {
     /* storage blocked */
   }
-  return detectBrowserChatLocale();
+  return DEFAULT_CHAT_LOCALE;
 }
 
 export function RiftChat() {
   const [open, setOpen] = useState(false);
-  const [locale, setLocale] = useState<ChatLocale>("en");
+  const [locale, setLocale] = useState<ChatLocale>(DEFAULT_CHAT_LOCALE);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
