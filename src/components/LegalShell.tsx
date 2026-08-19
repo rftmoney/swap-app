@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Translated } from "@/components/LanguageProvider";
 
 export function LegalShell({
@@ -18,6 +19,7 @@ export function LegalShell({
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="legal-nav" aria-label="Site">
+          <ThemeToggle />
           <Link href="/docs"><Translated id="docs" /></Link>
           <Link href="/terms"><Translated id="terms" /></Link>
           <Link href="/privacy"><Translated id="privacy" /></Link>

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Manrope, Sora } from "next/font/google";
 import { connection } from "next/server";
 import { MarketTicker } from "@/components/MarketTicker";
+import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const sora = Sora({
@@ -30,10 +32,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${sora.variable} ${manrope.variable} h-full antialiased`}
+      data-theme="dark"
+      suppressHydrationWarning
     >
+      <head>
+        <Script id="rift-theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col">
-        <MarketTicker />
-        {children}
+        <ThemeProvider>
+          <MarketTicker />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

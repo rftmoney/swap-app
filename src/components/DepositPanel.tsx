@@ -7,6 +7,7 @@ import {
   useLanguage,
 } from "@/components/LanguageProvider";
 import { SupportLink } from "@/components/SupportLink";
+import { useTheme } from "@/components/ThemeProvider";
 import { privateRiftUrl } from "@/lib/rift-history";
 import type { Shift } from "@/lib/sideshift-shared";
 import { coinIconUrl } from "@/lib/sideshift-shared";
@@ -63,8 +64,10 @@ const STEPS: TranslationKey[] = [
 
 export function DepositPanel({ shift, onBack, onRefresh }: Props) {
   const { locale, t } = useLanguage();
+  const { theme } = useTheme();
   const status = shift.status?.toLowerCase() ?? "waiting";
   const done = ["settled", "refunded", "expired"].includes(status);
+  const awaitingDeposit = status === "waiting" && !shift.depositAmount;
   const activeStep = STATUS_STEP[status] ?? 0;
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -243,7 +246,7 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
             value={shift.depositAddress}
             size={148}
             bgColor="transparent"
-            fgColor="#ffffff"
+            fgColor={theme === "light" ? "#0a0a0a" : "#ffffff"}
             level="M"
           />
           <figcaption>{t("scanPay")}</figcaption>
@@ -299,17 +302,42 @@ export function DepositPanel({ shift, onBack, onRefresh }: Props) {
               </dd>
             </div>
             <div>
-              <dt>{t("validUntil")}</dt>
-              <dd>
-                {shift.expiresAt
-                  ? new Date(shift.expiresAt).toLocaleString(locale, {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "—"}
-              </dd>
+              {awaitingDeposit ? (
+                <>
+                  <dt>{t("validUntil")}</dt>
+                  <dd>
+                    {shift.expiresAt
+                      ? new Date(shift.expiresAt).toLocaleString(locale, {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—"}
+                  </dd>
+                </>
+              ) : done ? (
+                <>
+                  <dt>
+                    {status === "settled" ? t("completedAt") : t("openedAt")}
+                  </dt>
+                  <dd>
+                    {shift.createdAt
+                      ? new Date(shift.createdAt).toLocaleString(locale, {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—"}
+                  </dd>
+                </>
+              ) : (
+                <>
+                  <dt>{t("rateLocked")}</dt>
+                  <dd>{t("rateLockedHint")}</dd>
+                </>
+              )}
             </div>
           </dl>
         </div>

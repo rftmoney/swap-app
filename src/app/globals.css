@@ -1,18 +1,48 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #000000;
   --line: rgba(255, 255, 255, 0.14);
   --line-strong: rgba(255, 255, 255, 0.32);
   --surface: #060606;
+  --elevated: #030303;
+  --hover: #0d0d0d;
   --text: #ffffff;
   --muted: #767676;
+  --muted-strong: #b8b8b8;
   --danger: #ff6b6b;
   --positive: #59d98e;
+  --brand-mark-line: #ffffff;
+  --qr-fg: #ffffff;
+  --scrollbar-thumb: #2b2b2b;
+  --scrollbar-thumb-hover: #4a4a4a;
+  --status-flash: #6ee7a8;
   --radius: 2px;
   --font-display: var(--font-sora);
   --font-body: var(--font-manrope);
   --font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f4f1;
+  --line: rgba(0, 0, 0, 0.1);
+  --line-strong: rgba(0, 0, 0, 0.22);
+  --surface: #ffffff;
+  --elevated: #ececea;
+  --hover: #e4e4e0;
+  --text: #0a0a0a;
+  --muted: #666666;
+  --muted-strong: #444444;
+  --danger: #c73737;
+  --positive: #1a9d55;
+  --brand-mark-line: #0a0a0a;
+  --qr-fg: #0a0a0a;
+  --scrollbar-thumb: #c8c8c4;
+  --scrollbar-thumb-hover: #a8a8a4;
+  --status-flash: #7fd4a8;
 }
 
 @theme inline {
@@ -59,7 +89,7 @@ svg {
 /* Scrollbars follow the hairline aesthetic instead of the OS default. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2b2b2b transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -74,11 +104,11 @@ svg {
 ::-webkit-scrollbar-thumb {
   border: 3px solid var(--bg);
   border-radius: 999px;
-  background: #2b2b2b;
+  background: var(--scrollbar-thumb);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: var(--scrollbar-thumb-hover);
 }
 
 ::-webkit-scrollbar-corner {
@@ -106,7 +136,7 @@ svg {
 .coin-dropdown ul::-webkit-scrollbar-thumb,
 .network-dropdown::-webkit-scrollbar-thumb,
 .card-invite::-webkit-scrollbar-thumb {
-  border: 2px solid #030303;
+  border: 2px solid var(--elevated);
   background: #333;
 }
 
@@ -231,7 +261,7 @@ input {
   bottom: 12%;
   left: 50%;
   width: 1px;
-  background: #fff;
+  background: var(--brand-mark-line);
   transform: translateX(-50%) rotate(14deg);
   transition: transform 0.35s ease;
 }
@@ -695,7 +725,7 @@ input {
 .coin-dropdown button:hover,
 .network-dropdown button[aria-selected="true"],
 .coin-dropdown button[aria-selected="true"] {
-  background: #0d0d0d;
+  background: var(--hover);
 }
 
 .coin-search {
@@ -1046,11 +1076,39 @@ input {
 
 @keyframes rift-status-flash {
   0% {
-    background: color-mix(in srgb, var(--surface) 70%, #6ee7a8 30%);
+    background: color-mix(in srgb, var(--surface) 70%, var(--status-flash) 30%);
   }
   100% {
     background: color-mix(in srgb, var(--surface) 88%, var(--text) 12%);
   }
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
+}
+
+.theme-toggle-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.top-nav .theme-toggle,
+.legal-nav .theme-toggle {
+  flex-shrink: 0;
 }
 
 .route {
@@ -1282,7 +1340,7 @@ input {
   border: 1px solid var(--line-strong);
   border-right: 0;
   border-radius: var(--radius) 0 0 var(--radius);
-  background: #030303;
+  background: var(--elevated);
   color: var(--text);
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.65);
   text-align: left;
@@ -1335,7 +1393,7 @@ input {
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
   border: 1px solid var(--line-strong);
-  background: #030303;
+  background: var(--elevated);
   box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.7);
   animation: card-invite-enter 0.35s ease both;
 }

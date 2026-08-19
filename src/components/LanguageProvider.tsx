@@ -129,6 +129,12 @@ const copy = {
     depositDetected: "Deposit detected",
     checkingStatus: "Checking status…",
     pollError: "Could not refresh status. Use Refresh or open your tracking link.",
+    rateLocked: "Rate locked",
+    rateLockedHint: "Locked when your deposit was detected",
+    openedAt: "Opened at",
+    completedAt: "Completed at",
+    themeLight: "Light mode",
+    themeDark: "Dark mode",
 } as const;
 
 export type TranslationKey = keyof typeof copy;
