@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RiftLookup } from "@/components/RiftLookup";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Recover a Rift",
@@ -18,7 +17,6 @@ export default function RiftLookupPage() {
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="legal-nav" aria-label="Site">
-          <ThemeToggle />
           <Link className="nav-button" href="/">
             Open swap →
           </Link>

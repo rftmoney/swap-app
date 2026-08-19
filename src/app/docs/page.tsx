@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Translated } from "@/components/LanguageProvider";
 
 export const metadata: Metadata = {
@@ -28,7 +27,6 @@ export default function DocsPage() {
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="legal-nav" aria-label="Site">
-          <ThemeToggle />
           <Link href="/terms"><Translated id="terms" /></Link>
           <Link href="/privacy"><Translated id="privacy" /></Link>
           <Link href="/rift"><Translated id="myRifts" /></Link>

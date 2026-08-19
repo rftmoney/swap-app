@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DeskClock } from "@/components/DeskClock";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { RecentTransactions } from "@/components/RecentTransactions";
 import { RiftCardInvite } from "@/components/RiftCardInvite";
@@ -32,7 +31,6 @@ export default function Home() {
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="top-nav" aria-label="Main navigation">
-          <ThemeToggle />
           <DeskClock />
           <Link href="/rift">{t("myRifts")}</Link>
           <Link href="/card">Card</Link>

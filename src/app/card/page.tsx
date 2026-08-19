@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CardPageContent } from "@/components/CardPageContent";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Translated } from "@/components/LanguageProvider";
 
 export const metadata: Metadata = {
@@ -18,7 +17,6 @@ export default function CardPage() {
           <span className="brand-name">Rift</span>
         </Link>
         <nav className="legal-nav" aria-label="Site">
-          <ThemeToggle />
           <Link href="/rift"><Translated id="myRifts" /></Link>
           <Link className="nav-button" href="/">
             Open swap →

@@ -24,9 +24,10 @@ export function RiftCardInvite() {
     } catch {
       // Storage may be unavailable in hardened/private browser contexts.
     }
+    const mobile = window.matchMedia("(max-width: 768px)").matches;
     const timer = window.setTimeout(
-      () => setPhase(dismissed ? "closed" : "open"),
-      dismissed ? 0 : 900,
+      () => setPhase(dismissed || mobile ? "closed" : "open"),
+      dismissed || mobile ? 0 : 900,
     );
     return () => window.clearTimeout(timer);
   }, []);
