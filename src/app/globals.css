@@ -268,8 +268,13 @@ input {
   color: var(--muted);
   font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
-  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.desk-clock.live-label i {
+  width: 0.42rem;
+  height: 0.42rem;
 }
 
 .top-nav > a:not(.nav-button),
